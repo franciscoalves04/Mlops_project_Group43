@@ -55,3 +55,7 @@ line-length = 120
 
 [tool.coverage.run]
 omit = ["tests/*"]
+
+[project.scripts]
+train = "eye_deseases_classification.train:main"
+evaluate = "eye_deseases_classification.evaluate:main"
