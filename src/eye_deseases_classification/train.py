@@ -5,11 +5,12 @@ from eye_deseases_classification.model import ResNet
 from eye_deseases_classification.data import MyDataset
 from pathlib import Path
 import csv
+import numpy as np
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
 BATCH_SIZE = 16
-EPOCHS = 5
+EPOCHS = 50
 LEARNING_RATE = 1e-3
 
 # Paths
@@ -32,7 +33,7 @@ def train():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-    # CSV file to log metrics
+    # CSV file - metrics
     csv_file = DOCS_DIR / "training_metrics.csv"
     with open(csv_file, mode="w", newline="") as f:
         writer = csv.writer(f)

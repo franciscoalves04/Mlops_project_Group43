@@ -4,6 +4,8 @@ from torch.utils.data import Dataset
 from PIL import Image
 from tqdm import tqdm
 import torch
+import numpy as np
+
 
 EXTENSIONS = {".jpg", ".jpeg", ".png"}
 IMAGE_SIZE = (256, 256)
@@ -33,13 +35,19 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         img_path, label = self.samples[index]
+
         img = Image.open(img_path).convert("RGB")
         img = img.resize(IMAGE_SIZE, Image.BILINEAR)
-        # Normalize to [0,1]
-        img = torch.tensor(torch.ByteTensor(torch.ByteStorage.from_buffer(img.tobytes())).float()).view(3, IMAGE_SIZE[0], IMAGE_SIZE[1]) / 255.0
+
+        # PIL -> numpy -> torch tensor
+        img = np.array(img, dtype=np.float32) / 255.0   # (H, W, C)
+        img = torch.from_numpy(img).permute(2, 0, 1)    # (C, H, W)
+
         if self.transform:
             img = self.transform(img)
+
         return img, label
+
 
     def preprocess(self, output_folder: Path):
         """Preprocess raw data into train/val/test splits."""
