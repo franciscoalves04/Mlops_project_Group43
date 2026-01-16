@@ -1,39 +1,26 @@
 from pathlib import Path
-import torch
+import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from eye_deseases_classification.model import ResNet
 from eye_deseases_classification.data import MyDataset
-import typer
 
-DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available() else
-    "cpu"
-)
+def evaluate():
 
-def evaluate(model_checkpoint: Path = Path("models/resnet_model.pt"), batch_size: int = 16) -> None:
+    checkpoint_dir = Path("models")
+    ckpts = list(checkpoint_dir.glob("*.ckpt"))
 
-    print(f"Loading model from {model_checkpoint}...")
-    model = ResNet().to(DEVICE)
-    model.load_state_dict(torch.load(model_checkpoint, map_location=DEVICE))
-    model.eval()
+    if len(ckpts) == 0:
+        raise FileNotFoundError("No checkpoint found in models/")
 
-    # Load test dataset
-    test_data_path = Path("data/processed/test")
-    test_dataset = MyDataset(test_data_path)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    best_ckpt = ckpts[0]  # only exist one (maybe change this)
 
-    correct, total = 0, 0
+    model = ResNet.load_from_checkpoint(best_ckpt)
 
-    with torch.no_grad():
-        for imgs, labels in test_loader:
-            imgs, labels = imgs.to(DEVICE), labels.to(DEVICE)
-            outputs = model(imgs)
-            preds = torch.argmax(outputs, dim=1)
-            correct += (preds == labels).sum().item()
-            total += labels.size(0)
+    test_dataset = MyDataset("data/processed/test")
+    test_loader = DataLoader(test_dataset, batch_size=16)
 
-    accuracy = correct / total
-    print(f"Test Accuracy: {accuracy * 100:.2f}%")
+    trainer = pl.Trainer()
+    trainer.test(model, test_loader)
 
 if __name__ == "__main__":
-    typer.run(evaluate)
+    evaluate()
