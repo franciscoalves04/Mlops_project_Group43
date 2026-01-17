@@ -2,20 +2,21 @@ from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pytorch_lightning.loggers import CSVLogger
+from eye_deseases_classification.logger import logger
 
 from eye_deseases_classification.data import MyDataset
-from eye_deseases_classification.model import ResNet  # LightningModule já configurado
+from eye_deseases_classification.model import ResNet
 
 
 def main():
-    # Load datasets
+    logger.info("Loading datasets...")
     train_dataset = MyDataset("data/processed/train")
     val_dataset = MyDataset("data/processed/val")
 
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=16)
+    logger.info("Datasets loaded successfully")
 
-    # Callbacks
     checkpoint_cb = ModelCheckpoint(
         dirpath="models",
         monitor="val_loss",
@@ -29,23 +30,20 @@ def main():
         mode="min"
     )
 
-    # Logger CSV - garante que só grava uma linha por epoch
-    logger = CSVLogger(save_dir="logs", name="resnet_training")
-
-    # Trainer
+    logger.info("Initializing trainer...")
+    logger.info("Model training started")
+    logger_csv = CSVLogger(save_dir="logs", name="resnet_training")
     trainer = Trainer(
         max_epochs=3,
         accelerator="auto",
         callbacks=[checkpoint_cb, early_stop_cb],
-        logger=logger,
-        log_every_n_steps=None,  # nunca loga por step
+        logger=logger_csv,
+        log_every_n_steps=None
     )
 
-    # Model
     model = ResNet(num_classes=4)
-
-    # Train
     trainer.fit(model, train_loader, val_loader)
+    logger.info("Training completed successfully")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from PIL import Image
 from tqdm import tqdm
 import torch
 import numpy as np
+from eye_deseases_classification.logger import logger
 
 
 EXTENSIONS = {".jpg", ".jpeg", ".png"}
@@ -29,6 +30,7 @@ class MyDataset(Dataset):
             images = images[:MAX_IMAGES]
             for img_path in images:
                 self.samples.append((img_path, label))
+        logger.info(f"Loaded {len(self.samples)} samples from {data_path}")
 
     def __len__(self):
         return len(self.samples)
@@ -39,7 +41,6 @@ class MyDataset(Dataset):
         img = Image.open(img_path).convert("RGB")
         img = img.resize(IMAGE_SIZE, Image.BILINEAR)
 
-        # PIL -> numpy -> torch tensor
         img = np.array(img, dtype=np.float32) / 255.0   # (H, W, C)
         img = torch.from_numpy(img).permute(2, 0, 1)    # (C, H, W)
 
@@ -48,9 +49,7 @@ class MyDataset(Dataset):
 
         return img, label
 
-
     def preprocess(self, output_folder: Path):
-        """Preprocess raw data into train/val/test splits."""
         output_folder = Path(output_folder)
         output_folder.mkdir(parents=True, exist_ok=True)
 
@@ -80,14 +79,14 @@ class MyDataset(Dataset):
                     out_path = output_folder / split / class_dir.name / img_path.name
                     img.save(out_path)
 
-            print(f"{class_dir.name}: {n_total} images processed")
+            logger.info(f"{class_dir.name}: {n_total} images processed into train/val/test")
 
 
 def preprocess(data_path: Path = Path("data/raw"), output_folder: Path = Path("data/processed")):
-    print("Preprocessing data...")
+    logger.info("Starting preprocessing...")
     dataset = MyDataset(data_path)
     dataset.preprocess(output_folder)
-    print("Preprocessing completed.")
+    logger.info("Preprocessing completed.")
 
 
 if __name__ == "__main__":
