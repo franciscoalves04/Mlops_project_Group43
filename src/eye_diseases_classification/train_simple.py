@@ -4,8 +4,8 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, LearningRateMonitor
 from pytorch_lightning.loggers import CSVLogger
 
-from eye_deseases_classification.data import MyDataset
-from eye_deseases_classification.model import ResNet
+from eye_diseases_classification.data import MyDataset
+from eye_diseases_classification.model import ResNet
 
 
 def main():

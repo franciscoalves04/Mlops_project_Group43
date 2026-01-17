@@ -3,7 +3,7 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 WORKDIR /app
 
 # Copy dependency files first for better layer caching
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 
 # Install dependencies without the project itself
 RUN uv sync --frozen --no-install-project --no-dev
@@ -23,8 +23,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy uv and virtual environment from builder
-COPY --from=builder /root/.local /root/.local
+# Copy virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 
@@ -51,4 +50,4 @@ LABEL maintainer="Group43" \
       description="Training container for eye diseases classification" \
       version="0.0.1"
 
-ENTRYPOINT ["python", "-m", "eye_deseases_classification.train"]
+ENTRYPOINT ["python", "-m", "eye_diseases_classification.train"]

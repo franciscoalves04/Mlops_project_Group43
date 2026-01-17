@@ -1,8 +1,8 @@
 from pathlib import Path
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from eye_deseases_classification.model import ResNet
-from eye_deseases_classification.data import MyDataset
+from eye_diseases_classification.model import ResNet
+from eye_diseases_classification.data import MyDataset
 
 def evaluate():
 

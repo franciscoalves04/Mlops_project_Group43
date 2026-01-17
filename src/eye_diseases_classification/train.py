@@ -12,8 +12,8 @@ from pytorch_lightning.loggers import CSVLogger, WandbLogger
 from pytorch_lightning.profilers import PyTorchProfiler
 from torch.utils.data import DataLoader
 
-from eye_deseases_classification.data import MyDataset
-from eye_deseases_classification.model import ResNet
+from eye_diseases_classification.data import MyDataset
+from eye_diseases_classification.model import ResNet
 
 try:
     import wandb
@@ -131,7 +131,7 @@ class TrainingCurveCallback(Callback):
         log.info(f"Training curves saved to {fig_path}")
 
 
-@hydra.main(version_base=None, config_path="../eye_deseases_classification/conf", config_name="config")
+@hydra.main(version_base=None, config_path="../eye_diseases_classification/conf", config_name="config")
 def main(cfg: DictConfig) -> None:
     """Train a model on eye diseases dataset."""
     log.info("=" * 80)

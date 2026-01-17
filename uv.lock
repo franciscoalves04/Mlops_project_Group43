@@ -380,7 +380,7 @@ wheels = [
 ]
 
 [[package]]
-name = "eye-deseases-classification"
+name = "eye-diseases-classification"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [

@@ -3,13 +3,15 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 WORKDIR /app
 
 # Copy dependency files first for better layer caching
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 
 # Install dependencies without the project itself
 RUN uv sync --frozen --no-install-project --no-dev
 
 # Copy source code
 COPY src ./src
+
+# Note: Models are mounted at runtime via volume (see docker-compose.yml or use -v flag)
 
 # Install the project
 RUN uv sync --frozen --no-dev
@@ -23,8 +25,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy uv and virtual environment from builder
-COPY --from=builder /root/.local /root/.local
+# Copy virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 
@@ -58,4 +59,4 @@ LABEL maintainer="Group43" \
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()" || exit 1
 
-CMD ["uvicorn", "eye_deseases_classification.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "eye_diseases_classification.api:app", "--host", "0.0.0.0", "--port", "8000"]

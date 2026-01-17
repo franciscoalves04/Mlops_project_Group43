@@ -6,9 +6,6 @@ manual_test/
 # other local dev info
 .vscode/
 
-# Nested project directory (accidental clone)
-Mlops_project_Group43/
-
 # Mac OS-specific storage files
 .DS_Store
 
