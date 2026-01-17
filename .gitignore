@@ -88,6 +88,7 @@ models/
 # Logs
 logs/
 lightning_logs/
+reports/
 
 # Hydra outputs
 outputs/
