@@ -1,0 +1,29 @@
+# @package _global_
+train_dataset_path: 'data/processed/train'
+val_dataset_path: 'data/processed/val'
+batch_size: 16
+max_epochs: 3
+shuffle: true
+num_workers: 19
+
+trainer:
+  accelerator: 'auto'
+  log_every_n_steps: null
+
+checkpoint:
+  dirpath: 'models'
+  monitor: 'val_loss'
+  mode: 'min'
+  save_top_k: 1
+
+early_stopping:
+  monitor: 'val_loss'
+  patience: 5
+  mode: 'min'
+
+logger:
+  save_dir: 'logs'
+  name: 'resnet_training'
+
+model:
+  num_classes: 4
