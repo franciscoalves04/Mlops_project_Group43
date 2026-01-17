@@ -6,6 +6,9 @@ manual_test/
 # other local dev info
 .vscode/
 
+# Nested project directory (accidental clone)
+Mlops_project_Group43/
+
 # Mac OS-specific storage files
 .DS_Store
 
@@ -88,6 +91,18 @@ models/
 # Logs
 logs/
 lightning_logs/
+
+# Hydra outputs
+outputs/
+multirun/
+
+# WandB
+wandb/
+
+# Training artifacts
+reports/figures/*.png
+reports/figures/*.jpg
+reports/figures/*.pdf
 
 # Django stuff:
 *.log

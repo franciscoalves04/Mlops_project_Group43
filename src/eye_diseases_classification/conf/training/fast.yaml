@@ -1,0 +1,20 @@
+# Fast training configuration for testing
+
+epochs: 3
+batch_size: 32
+
+optimizer: "adamw"
+learning_rate: 0.001
+weight_decay: 0.0001
+
+scheduler:
+  enabled: false
+
+early_stopping:
+  enabled: false
+
+checkpoint:
+  monitor: "val_loss"
+  mode: "min"
+  save_top_k: 1
+  filename: "fast_model-{epoch:02d}-{val_loss:.3f}"

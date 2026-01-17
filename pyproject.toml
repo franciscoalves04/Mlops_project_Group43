@@ -3,9 +3,9 @@ requires = ["uv_build>=0.9.22,<0.10.0"]
 build-backend = "uv_build"
 
 [project]
-name = "eye_deseases_classification"
+name = "eye-diseases-classification"
 version = "0.0.1"
-description = "A short description of the project."
+description = "Eye diseases classification using deep learning."
 authors = [
   { name = "Group43", email = "your@email.com" },
 ]
@@ -19,7 +19,10 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi==0.115.6",
+    "hydra-core>=1.3.0",
+    "matplotlib>=3.10.0",
     "numpy>=2.4.1",
+    "omegaconf>=2.3.0",
     "pillow>=12.1.0",
     "pytorch-lightning>=2.6.0",
     "torch==2.6.0",
@@ -27,6 +30,7 @@ dependencies = [
     "tqdm>=4.67.1",
     "typer==0.15.1",
     "uvicorn==0.34.0",
+    "wandb>=0.19.0",
 ]
 
 [dependency-groups]
@@ -60,3 +64,8 @@ line-length = 120
 
 [tool.coverage.run]
 omit = ["tests/*"]
+
+[project.scripts]
+train = "eye_diseases_classification.train:main"
+evaluate = "eye_diseases_classification.evaluate:evaluate"
+visualize = "eye_diseases_classification.visualize:app"
