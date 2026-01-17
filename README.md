@@ -34,6 +34,69 @@ Key components of the model pipeline:
 
 ---
 
+
+## How to Use the CLI
+
+The project provides a command-line interface (CLI) built with Typer for training and evaluating models. All commands use Hydra for configuration management, allowing flexible parameter overrides.
+
+### Training
+
+Train a model using the baseline configuration:
+
+```bash
+uv run eye-diseases train
+```
+
+Override specific training parameters:
+
+```bash
+uv run eye-diseases train --epochs 50
+uv run eye-diseases train --epochs 100 --batch-size 32
+uv run eye-diseases train --epochs 50 --batch-size 32 --learning-rate 0.0001
+```
+
+Use a different configuration file:
+
+```bash
+uv run eye-diseases train --config custom_config
+```
+
+### Evaluation
+
+Evaluate a trained model on the test dataset:
+
+```bash
+uv run eye-diseases evaluate
+```
+
+Specify a custom model checkpoint:
+
+```bash
+uv run eye-diseases evaluate --model models/resnet_model_epoch50.pt
+```
+
+Override batch size for evaluation:
+
+```bash
+uv run eye-diseases evaluate --model models/resnet_model_epoch50.pt --batch-size 32
+```
+
+### Help
+
+View available commands:
+
+```bash
+uv run eye-diseases --help
+```
+
+View help for a specific command:
+
+```bash
+uv run eye-diseases train --help
+uv run eye-diseases evaluate --help
+```
+
+---
 ## Project structure
 
 The directory structure of the project looks like this:

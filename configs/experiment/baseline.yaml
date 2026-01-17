@@ -1,0 +1,33 @@
+name: baseline_resnet
+description: Baseline ResNet model for eye disease classification
+version: 0.0.1
+
+training:
+  epochs: 2
+  batch_size: 16
+  learning_rate: 0.001
+  optimizer: adam
+  loss_function: crossentropy
+  device: auto
+
+model:
+  architecture: resnet
+  pretrained: false
+  num_classes: 4
+
+data:
+  train_path: data/processed/train
+  val_path: data/processed/val
+  test_path: data/processed/test
+  img_size: 224
+  normalize: true
+
+checkpoints:
+  save_epochs: [50, 60, 70]
+  save_dir: models
+  save_interval: 10
+
+logging:
+  metrics_dir: docs
+  log_file: training_metrics.csv
+  log_interval: 1

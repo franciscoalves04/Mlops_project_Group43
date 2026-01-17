@@ -1,0 +1,35 @@
+# Hyperparameter tuning experiment
+experiment:
+  name: "hyperparameter_tuning"
+  description: "Tuning learning rate and batch size"
+  version: "0.0.1"
+
+training:
+  epochs: 100
+  batch_size: 32
+  learning_rate: 0.0005
+  optimizer: "adam"
+  loss_function: "crossentropy"
+  device: "auto"
+
+model:
+  architecture: "resnet"
+  pretrained: false
+  num_classes: 4
+
+data:
+  train_path: "data/processed/train"
+  val_path: "data/processed/val"
+  test_path: "data/processed/test"
+  img_size: 224
+  normalize: true
+
+checkpoints:
+  save_epochs: [50, 75, 100]
+  save_dir: "models"
+  save_interval: 10
+
+logging:
+  metrics_dir: "docs"
+  log_file: "training_metrics_tuning.csv"
+  log_interval: 1

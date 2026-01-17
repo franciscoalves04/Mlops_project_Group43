@@ -1,5 +1,17 @@
 docs/site/
 
+# Generated files
+training_metrics.csv
+resnet_model_epoch50.pth
+resnet_model_epoch60.pth
+resnet_model_epoch70.pth
+
+# Hydra outputs
+outputs/
+
+# models
+models
+
 # test cache
 manual_test/
 
