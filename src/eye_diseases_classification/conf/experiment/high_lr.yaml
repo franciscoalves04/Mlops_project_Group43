@@ -1,0 +1,14 @@
+# High learning rate experiment
+
+# defaults:
+#   - override /training: default
+
+experiment:
+  name: "eye-diseases-high-lr"
+  description: "Testing higher learning rate"
+
+model:
+  learning_rate: 0.003  # 3x higher
+
+training:
+  epochs: 25

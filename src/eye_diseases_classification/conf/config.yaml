@@ -1,0 +1,38 @@
+# Main configuration file for eye diseases classification training
+
+defaults:
+  - model: resnet
+  - training: default
+  - data: default
+  - _self_
+
+experiment:
+  name: "eye-diseases-baseline"
+  seed: 42
+  description: "Training ResNet on eye diseases dataset"
+
+# Paths
+paths:
+  data_dir: "data/processed"
+  model_dir: "models"
+  log_dir: "logs"
+  reports_dir: "reports/figures"
+
+# Hardware
+hardware:
+  accelerator: "auto"  # auto, cpu, gpu, mps
+  devices: 1
+  num_workers: 4
+
+# Logging
+logging:
+  use_wandb: true
+  wandb_project: "eye-diseases-classification"
+  use_csv: true
+  csv_save_dir: "logs"
+  
+# Profiling
+profiling:
+  enabled: false
+  dirpath: "logs/profiler"
+  filename: "trace"

@@ -1,0 +1,22 @@
+# Data configuration
+
+# Data paths
+train_path: "data/processed/train"
+val_path: "data/processed/val"
+test_path: "data/processed/test"
+
+# Image preprocessing
+image_size: [256, 256]
+num_classes: 4
+class_names: ["cataract", "diabetic_retinopathy", "glaucoma", "normal"]
+
+# Data augmentation
+augmentation:
+  train: true
+  val: false
+  test: false
+  
+# Normalization (ImageNet stats)
+normalize:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]

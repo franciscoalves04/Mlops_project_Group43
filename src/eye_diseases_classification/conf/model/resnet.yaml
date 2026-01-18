@@ -1,0 +1,16 @@
+# Model architecture configuration
+
+name: "resnet"
+num_classes: 4
+
+# Architecture hyperparameters
+conv1_channels: 64
+conv2_channels: 128
+conv3_channels: 256
+conv4_channels: 512
+
+dropout: 0.4
+
+# Training hyperparameters
+learning_rate: 0.001
+weight_decay: 0.0001

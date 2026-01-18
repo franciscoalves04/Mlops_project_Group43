@@ -1,0 +1,11 @@
+# Large batch size experiment
+
+experiment:
+  name: "eye-diseases-large-batch"
+  description: "Testing larger batch size with adjusted LR"
+
+training:
+  batch_size: 128
+  
+model:
+  learning_rate: 0.002  # Scale with batch size

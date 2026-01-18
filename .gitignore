@@ -72,6 +72,36 @@ cover/
 *.mo
 *.pot
 
+# Data
+data/processed/
+data/raw/
+
+# Models
+models/
+*.pth
+*.ckpt
+*.pt
+*.h5
+*.pkl
+*.joblib
+
+# Logs
+logs/
+lightning_logs/
+reports/
+
+# Hydra outputs
+outputs/
+multirun/
+
+# WandB
+wandb/
+
+# Training artifacts
+reports/figures/*.png
+reports/figures/*.jpg
+reports/figures/*.pdf
+
 # Django stuff:
 *.log
 local_settings.py
