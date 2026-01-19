@@ -15,6 +15,9 @@ from torch.utils.data import DataLoader
 from eye_diseases_classification.data import MyDataset
 from eye_diseases_classification.model import ResNet
 
+import shutil  
+from google.cloud import storage 
+
 try:
     import wandb
     WANDB_AVAILABLE = True
@@ -129,6 +132,35 @@ class TrainingCurveCallback(Callback):
 
         plt.close(fig)
         log.info(f"Training curves saved to {fig_path}")
+
+def upload_local_directory_to_gcs(local_path: str, gcs_uri: str):
+    """Uploads a local directory to a GCS URI."""
+    if not gcs_uri.startswith("gs://"):
+        log.warning(f"Invalid GCS URI: {gcs_uri}. Skipping upload.")
+        return
+
+    log.info(f"Uploading artifacts from {local_path} to {gcs_uri}...")
+    
+    # Parse bucket and prefix
+    # URI format: gs://bucket-name/path/to/dir
+    parts = gcs_uri[5:].split("/", 1)
+    bucket_name = parts[0]
+    prefix = parts[1] if len(parts) > 1 else ""
+    
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+
+    # Walk through the local directory
+    local_path = Path(local_path)
+    for local_file in local_path.rglob("*"):
+        if local_file.is_file():
+            # Create the relative path for the blob
+            relative_path = local_file.relative_to(local_path)
+            blob_path = os.path.join(prefix, relative_path)
+            
+            blob = bucket.blob(blob_path)
+            blob.upload_from_filename(str(local_file))
+            log.info(f"Uploaded: {local_file.name}")
 
 
 @hydra.main(version_base=None, config_path="../eye_diseases_classification/conf", config_name="config")
@@ -274,6 +306,16 @@ def main(cfg: DictConfig) -> None:
     # Finish wandb run
     if cfg.logging.use_wandb and WANDB_AVAILABLE and wandb.run:
         wandb.finish()
+    
+    # Upload artifacts to GCS if configured
+    gcs_model_dir = os.environ.get("AIP_MODEL_DIR")
+    
+    if gcs_model_dir:
+        log.info(f"Found AIP_MODEL_DIR: {gcs_model_dir}")
+        # Upload the local 'models' folder to the GCS bucket
+        upload_local_directory_to_gcs(cfg.paths.model_dir, gcs_model_dir)
+    else:
+        log.info("AIP_MODEL_DIR not found. Skipping GCS upload (likely running locally).")
 
 
 if __name__ == "__main__":
