@@ -15,7 +15,7 @@ COPY src ./src
 RUN uv sync --frozen --no-dev
 
 # Runtime stage
-FROM python:3.12-slim
+FROM pytorch/pytorch:2.4.0-cuda12.1-cudnn9-runtime
 
 WORKDIR /app
 
@@ -26,6 +26,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
+
+# Copy entrypoint script
+COPY dockerfiles/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 # Set environment variables
 ENV PATH="/app/.venv/bin:$PATH" \
@@ -50,4 +54,4 @@ LABEL maintainer="Group43" \
       description="Training container for eye diseases classification" \
       version="0.0.1"
 
-ENTRYPOINT ["python", "-m", "eye_diseases_classification.train"]
+ENTRYPOINT ["/app/entrypoint.sh"]

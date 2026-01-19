@@ -1,0 +1,105 @@
+name: Train Model on Vertex AI
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Images"]
+    types: [completed]
+    branches: [Automation, main]
+  workflow_dispatch: # Manual trigger
+
+env:
+  REGISTRY: europe-west1-docker.pkg.dev
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REPOSITORY: mlops-images
+  IMAGE_NAME: train
+  REGION: europe-west1
+
+jobs:
+  submit-training-job:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      # 1. Determine which branch triggered this run
+      - name: Determine Branch Name
+        id: get_branch
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_run" ]; then
+            echo "Detected workflow_run trigger."
+            echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "Detected manual trigger."
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check upstream workflow status
+        if: github.event_name == 'workflow_run'
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "Upstream Docker Build failed! Stopping training."
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        # Important: Checkout the code from the TRIGGERING branch, not default
+        with:
+          ref: ${{ steps.get_branch.outputs.branch }}
+
+      - name: Sanitize Project ID
+        run: |
+          CLEAN_ID=$(echo "${{ secrets.GCP_PROJECT_ID }}" | tr -d '\n' | tr -d '\r' | xargs)
+          echo "PROJECT_ID=$CLEAN_ID" >> $GITHUB_ENV
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      - name: Submit Vertex AI Custom Training Job
+        run: |
+          # USE THE DYNAMIC BRANCH NAME HERE
+          TARGET_BRANCH="${{ steps.get_branch.outputs.branch }}"
+          IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${TARGET_BRANCH}"
+          
+          echo "Preparing job for image: $IMAGE_URI"
+
+          cat > config.yaml <<EOF
+          baseOutputDirectory:
+            outputUriPrefix: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
+          workerPoolSpecs:
+            - machineSpec:
+                machineType: n1-standard-4
+                acceleratorType: NVIDIA_TESLA_T4
+                acceleratorCount: 1
+              replicaCount: 1
+              containerSpec:
+                imageUri: $IMAGE_URI
+                env:
+                  - name: WANDB_API_KEY
+                    value: ${{ secrets.WANDB_API_KEY }}
+                  - name: GCS_DATA_PATH
+                    value: gs://mlops-data-profound-nuance-438223-i0/processed
+                args: []
+          EOF
+
+          gcloud ai custom-jobs create \
+            --display-name="train-${TARGET_BRANCH}-$(date +%Y%m%d-%H%M%S)" \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --config=config.yaml
+
+      - name: Print Job Submission Status
+        run: |
+          echo "Training job submitted successfully!"
+          echo "Monitor progress at: https://console.cloud.google.com/vertex-ai/training/custom-jobs?project=${{ env.PROJECT_ID }}"
