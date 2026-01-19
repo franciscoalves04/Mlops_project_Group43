@@ -16,7 +16,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11, <3.13"
 dependencies = [
     "fastapi==0.115.6",
     "google-cloud-storage>=2.15.0",
@@ -49,18 +49,14 @@ dev = [
 ]
 
 
-[tool.uv.sources]
-torch = [
-    { index = "pytorch-cpu" },
-]
-torchvision = [
-    { index = "pytorch-cpu" },
-]
-
 [[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu124"
 explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch" }]
+torchvision = [{ index = "pytorch" }]
 
 [tool.ruff]
 line-length = 120
@@ -72,3 +68,4 @@ omit = ["tests/*"]
 train = "eye_diseases_classification.train:main"
 evaluate = "eye_diseases_classification.evaluate:evaluate"
 visualize = "eye_diseases_classification.visualize:app"
+
