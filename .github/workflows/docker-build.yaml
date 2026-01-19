@@ -74,13 +74,15 @@ jobs:
       - name: Generate tags
         id: tags
         run: |
-          IMAGE_BASE="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}"
           BRANCH="${{ github.ref_name }}"
-          SHA_SHORT="${{ github.sha }}"
-          SHA_SHORT="${SHA_SHORT:0:7}"
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
           
-          echo "tags=${IMAGE_BASE}:${BRANCH},${IMAGE_BASE}:${BRANCH}-${SHA_SHORT}" >> $GITHUB_OUTPUT
-          echo "Generated tags: ${IMAGE_BASE}:${BRANCH},${IMAGE_BASE}:${BRANCH}-${SHA_SHORT}"
+          TAG1="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${BRANCH}"
+          TAG2="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${BRANCH}-${SHA_SHORT}"
+          
+          echo "tags=${TAG1},${TAG2}" >> $GITHUB_OUTPUT
+          echo "Generated tag 1: ${TAG1}"
+          echo "Generated tag 2: ${TAG2}"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
