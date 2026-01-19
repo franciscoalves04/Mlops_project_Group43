@@ -1,16 +1,12 @@
 name: Train Model on Vertex AI
 
 on:
-  push:
-    branches:
-      - main
-      - Automation
-    paths:
-      - 'dockerfiles/**'
-      - 'src/**'
-      - 'pyproject.toml'
-      - '.github/workflows/vertex-ai-training.yaml'
-  workflow_dispatch: # Manual trigger
+  workflow_run:
+    workflows: ["Build and Push Docker Images"]
+    types: [completed]
+    branches: [Automation, main]
+  workflow_dispatch: # Manual trigger for debugging
+  
 env:
   REGISTRY: europe-west1-docker.pkg.dev
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -26,6 +22,14 @@ jobs:
       id-token: write
 
     steps:
+      - name: Check docker-build workflow status
+        if: github.event_name == 'workflow_run'
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "docker-build workflow failed. Skipping training."
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
 
