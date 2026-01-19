@@ -33,6 +33,15 @@ jobs:
     permissions:
       contents: read
       id-token: write
+
+
+    strategy:
+      matrix:
+        image:
+          - name: train
+            dockerfile: dockerfiles/train.dockerfile
+            context: .
+
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -44,15 +53,6 @@ jobs:
           large-packages: true
           docker-images: true
           swap-storage: false
-
-    strategy:
-      matrix:
-        image:
-          - name: train
-            dockerfile: dockerfiles/train.dockerfile
-            context: .
-
-    steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
