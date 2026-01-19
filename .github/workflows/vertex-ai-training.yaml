@@ -6,6 +6,7 @@ on:
       - main
       - Automation
     paths:
+      - 'dockerfiles/**'
       - 'src/**'
       - 'pyproject.toml'
       - '.github/workflows/vertex-ai-training.yaml'
