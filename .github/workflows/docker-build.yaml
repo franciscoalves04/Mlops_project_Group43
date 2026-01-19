@@ -76,11 +76,11 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}
+          flavor: |
+            latest=false
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
             type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
