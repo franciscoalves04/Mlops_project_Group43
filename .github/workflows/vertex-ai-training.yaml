@@ -1,7 +1,6 @@
 name: Train Model on Vertex AI
 
 on:
-  workflow_dispatch: # Manual trigger
   push:
     branches:
       - main
@@ -10,7 +9,7 @@ on:
       - 'src/**'
       - 'pyproject.toml'
       - '.github/workflows/vertex-ai-training.yaml'
-
+  workflow_dispatch: # Manual trigger
 env:
   REGISTRY: europe-west1-docker.pkg.dev
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
