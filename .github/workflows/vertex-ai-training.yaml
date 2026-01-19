@@ -5,8 +5,8 @@ on:
     workflows: ["Build and Push Docker Images"]
     types: [completed]
     branches: [Automation, main]
-  workflow_dispatch: # Manual trigger for debugging
-  
+  workflow_dispatch: # Manual trigger
+
 env:
   REGISTRY: europe-west1-docker.pkg.dev
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -22,16 +22,31 @@ jobs:
       id-token: write
 
     steps:
-      - name: Check docker-build workflow status
+      # 1. Determine which branch triggered this run
+      - name: Determine Branch Name
+        id: get_branch
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_run" ]; then
+            echo "Detected workflow_run trigger."
+            echo "branch=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "Detected manual trigger."
+            echo "branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check upstream workflow status
         if: github.event_name == 'workflow_run'
         run: |
           if [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
-            echo "docker-build workflow failed. Skipping training."
+            echo "Upstream Docker Build failed! Stopping training."
             exit 1
           fi
 
       - name: Checkout code
         uses: actions/checkout@v4
+        # Important: Checkout the code from the TRIGGERING branch, not default
+        with:
+          ref: ${{ steps.get_branch.outputs.branch }}
 
       - name: Sanitize Project ID
         run: |
@@ -53,11 +68,12 @@ jobs:
 
       - name: Submit Vertex AI Custom Training Job
         run: |
-          IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
+          # USE THE DYNAMIC BRANCH NAME HERE
+          TARGET_BRANCH="${{ steps.get_branch.outputs.branch }}"
+          IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${TARGET_BRANCH}"
           
           echo "Preparing job for image: $IMAGE_URI"
 
-          # Create the config file with the CORRECT field name: outputUriPrefix
           cat > config.yaml <<EOF
           baseOutputDirectory:
             outputUriPrefix: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
@@ -77,9 +93,8 @@ jobs:
                 args: []
           EOF
 
-          # Submit the job referencing the file
           gcloud ai custom-jobs create \
-            --display-name="train-${{ github.ref_name }}-$(date +%Y%m%d-%H%M%S)" \
+            --display-name="train-${TARGET_BRANCH}-$(date +%Y%m%d-%H%M%S)" \
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.REGION }} \
             --config=config.yaml
