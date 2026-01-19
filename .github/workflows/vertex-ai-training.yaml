@@ -29,6 +29,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Sanitize Project ID
+        run: |
+          CLEAN_ID=$(echo "${{ secrets.GCP_PROJECT_ID }}" | tr -d '\n' | tr -d '\r' | xargs)
+          echo "PROJECT_ID=$CLEAN_ID" >> $GITHUB_ENV
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -46,13 +51,10 @@ jobs:
         run: |
           IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
           
-          echo "Submitting job with Image: $IMAGE_URI"
+          echo "Preparing job for image: $IMAGE_URI"
 
-          gcloud ai custom-jobs create \
-            --display-name="train-${{ github.ref_name }}-$(date +%Y%m%d-%H%M%S)" \
-            --project=${{ env.PROJECT_ID }} \
-            --region=${{ env.REGION }} \
-            --config=- <<EOF
+          # 1. Create the config file (Safer than piping <<EOF directly)
+          cat > config.yaml <<EOF
           baseOutputDirectory:
             outputUri: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
           workerPoolSpecs:
@@ -69,7 +71,14 @@ jobs:
                   - name: GCS_DATA_PATH
                     value: gs://mlops-data-profound-nuance-438223-i0/processed
                 args: []
-        EOF
+          EOF
+
+          # 2. Submit the job referencing the file
+          gcloud ai custom-jobs create \
+            --display-name="train-${{ github.ref_name }}-$(date +%Y%m%d-%H%M%S)" \
+            --project=${{ env.PROJECT_ID }} \
+            --region=${{ env.REGION }} \
+            --config=config.yaml
 
       - name: Print Job Submission Status
         run: |
