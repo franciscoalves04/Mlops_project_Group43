@@ -42,33 +42,33 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.REGISTRY }}
 
-      - name: Submit Vertex AI Custom Training Job
+- name: Submit Vertex AI Custom Training Job
         run: |
           IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
           
-          # Submit training job using gcloud CLI with correct YAML format
+          echo "Submitting job with Image: $IMAGE_URI"
+
           gcloud ai custom-jobs create \
             --display-name="train-${{ github.ref_name }}-$(date +%Y%m%d-%H%M%S)" \
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.REGION }} \
             --config=- <<EOF
-          jobSpec:
-            baseOutputDirectory:
-              outputUri: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
-            workerPoolSpecs:
-              - machineSpec:
-                  machineType: n1-standard-4
-                  acceleratorType: NVIDIA_TESLA_K80
-                  acceleratorCount: 1
-                replicaCount: 1
-                containerSpec:
-                  imageUri: $IMAGE_URI
-                  env:
-                    - name: WANDB_API_KEY
-                      value: ${{ secrets.WANDB_API_KEY }}
-                    - name: GCS_DATA_PATH
-                      value: gs://mlops-data-profound-nuance-438223-i0/processed
-                  args: []
+          baseOutputDirectory:
+            outputUri: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
+          workerPoolSpecs:
+            - machineSpec:
+                machineType: n1-standard-4
+                acceleratorType: NVIDIA_TESLA_K80
+                acceleratorCount: 1
+              replicaCount: 1
+              containerSpec:
+                imageUri: $IMAGE_URI
+                env:
+                  - name: WANDB_API_KEY
+                    value: ${{ secrets.WANDB_API_KEY }}
+                  - name: GCS_DATA_PATH
+                    value: gs://mlops-data-profound-nuance-438223-i0/processed
+                args: []
           EOF
 
       - name: Print Job Submission Status
