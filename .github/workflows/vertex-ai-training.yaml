@@ -53,10 +53,10 @@ jobs:
           
           echo "Preparing job for image: $IMAGE_URI"
 
-          # 1. Create the config file (Safer than piping <<EOF directly)
+          # Create the config file with the CORRECT field name: outputUriPrefix
           cat > config.yaml <<EOF
           baseOutputDirectory:
-            outputUri: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
+            outputUriPrefix: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
           workerPoolSpecs:
             - machineSpec:
                 machineType: n1-standard-4
@@ -73,7 +73,7 @@ jobs:
                 args: []
           EOF
 
-          # 2. Submit the job referencing the file
+          # Submit the job referencing the file
           gcloud ai custom-jobs create \
             --display-name="train-${{ github.ref_name }}-$(date +%Y%m%d-%H%M%S)" \
             --project=${{ env.PROJECT_ID }} \
