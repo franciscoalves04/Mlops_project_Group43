@@ -11,6 +11,7 @@ on:
       - 'pyproject.toml'
       - 'uv.lock'
       - '.github/workflows/docker-build.yaml'
+      - '.github/workflows/vertex-ai-training.yaml'
   pull_request:
     branches:
       - main
