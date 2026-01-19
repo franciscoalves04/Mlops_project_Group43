@@ -1,22 +1,22 @@
 """
  Unit tests for the ResNet model in eye_diseases_classification.model.
  usage: uv run pytest tests/test_model.py -v 
+ Test Classes:
+    TestModelConstruction - Tests model initialization with default/custom parameters, hyperparameter saving, layer architecture, and loss function
+    TestModelForward - Tests forward pass output shape/type, gradient flow, NaN handling, and various batch sizes
+    TestModelTrainingStep - Tests training step loss computation and return values
+    TestModelValidationStep - Tests validation step behavior
+    TestModelTestStep - Tests test step behavior
+    TestModelOptimizer - Tests optimizer and scheduler configuration, weight decay, and learning rates
+    TestModelTraining - Tests end-to-end training with PyTorch Lightning, parameter updates, and model behavior
+    TestModelLossComputation - Tests loss values and convergence during training
 """
 
-import os
-
-import pytest
 import torch
 from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader, TensorDataset
 
 from eye_diseases_classification.model import ResNet
-
-DATA_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "../data/processed/test"
-)
-
 
 class TestModelConstruction:
     """Test model initialization and architecture."""
