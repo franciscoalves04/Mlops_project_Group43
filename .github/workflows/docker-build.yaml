@@ -71,26 +71,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Generate tags
-        id: tags
-        run: |
-          BRANCH="${{ github.ref_name }}"
-          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
-          
-          TAG1="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${BRANCH}"
-          TAG2="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${BRANCH}-${SHA_SHORT}"
-          
-          echo "tags=${TAG1},${TAG2}" >> $GITHUB_OUTPUT
-          echo "Generated tag 1: ${TAG1}"
-          echo "Generated tag 2: ${TAG2}"
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.image.context }}
           file: ${{ matrix.image.dockerfile }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.tags.outputs.tags }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${{ github.ref_name }}-${{ hashFiles('**/pyproject.toml') }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
