@@ -1,3 +1,8 @@
+"""
+ Unit tests for the ResNet model in eye_diseases_classification.model.
+ usage: uv run pytest tests/test_model.py -v 
+"""
+
 import os
 
 import pytest
