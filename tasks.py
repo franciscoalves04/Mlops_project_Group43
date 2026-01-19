@@ -24,6 +24,17 @@ def test(ctx: Context) -> None:
     ctx.run("uv run coverage report -m -i", echo=True, pty=not WINDOWS)
 
 @task
+def coverage(ctx: Context) -> None:
+    """Run tests with coverage."""
+    ctx.run("uv run coverage run -m pytest", echo=True, pty=not WINDOWS)
+    ctx.run("uv run coverage report -m", echo=True, pty=not WINDOWS)
+
+@task
+def coverage_report(ctx: Context) -> None:
+    """Display coverage report."""
+    ctx.run("uv run coverage report -m", echo=True, pty=not WINDOWS)
+
+@task
 def docker_build(ctx: Context, progress: str = "plain") -> None:
     """Build docker images."""
     ctx.run(
