@@ -39,13 +39,21 @@ jobs:
           - name: train
             dockerfile: dockerfiles/train.dockerfile
             context: .
-          - name: api
-            dockerfile: dockerfiles/api.dockerfile
-            context: .
+          # API disabled until Person D implements it
+          # - name: api
+          #   dockerfile: dockerfiles/api.dockerfile
+          #   context: .
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Debug - Check environment variables
+        run: |
+          echo "REGISTRY: ${{ env.REGISTRY }}"
+          echo "PROJECT_ID: ${{ env.PROJECT_ID }}"
+          echo "REPOSITORY: ${{ env.REPOSITORY }}"
+          echo "PROJECT_ID is set: ${{ env.PROJECT_ID != '' }}"
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
