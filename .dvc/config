@@ -1,5 +1,0 @@
-[core]
-    remote = myremote
-['remote "myremote"']
-    url = gs://mlops-data-profound-nuance-438223-i0
-    projectname = profound-nuance-438223-i0

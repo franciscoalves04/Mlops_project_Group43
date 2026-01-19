@@ -27,6 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
 
+# Copy entrypoint script
+COPY dockerfiles/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 # Set environment variables
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1 \
@@ -50,4 +54,4 @@ LABEL maintainer="Group43" \
       description="Training container for eye diseases classification" \
       version="0.0.1"
 
-ENTRYPOINT ["python", "-m", "eye_diseases_classification.train"]
+ENTRYPOINT ["/app/entrypoint.sh"]
