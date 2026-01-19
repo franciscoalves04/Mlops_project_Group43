@@ -26,10 +26,13 @@ COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
 COPY pyproject.toml uv.lock README.md ./
 
 # Install dependencies in runtime image (not builder's venv)
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --no-install-project
 
 # Copy source code
 COPY src ./src
+
+# Install the project in runtime image
+RUN uv sync --frozen --no-dev
 
 # Copy entrypoint script
 COPY dockerfiles/entrypoint.sh /app/entrypoint.sh
