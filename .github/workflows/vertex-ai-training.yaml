@@ -46,13 +46,12 @@ jobs:
         run: |
           IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
           
-          # Submit training job
+          # Submit training job using gcloud CLI with correct YAML format
           gcloud ai custom-jobs create \
             --display-name="train-${{ github.ref_name }}-$(date +%Y%m%d-%H%M%S)" \
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.REGION }} \
             --config=- <<EOF
-          displayName: train-model
           jobSpec:
             baseOutputDirectory:
               outputUri: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
