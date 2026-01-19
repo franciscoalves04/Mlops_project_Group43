@@ -1,37 +1,9 @@
-name: Build and Push Docker Images
-
-on:
-  push:
-    branches:
-      - main
-      - Automation
-    paths:
-      - 'dockerfiles/**'
-      - 'src/**'
-      - 'pyproject.toml'
-      - 'uv.lock'
-      - '.github/workflows/docker-build.yaml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'dockerfiles/**'
-      - 'src/**'
-      - 'pyproject.toml'
-      - 'uv.lock'
-  workflow_dispatch: # Allow manual trigger
-
-env:
-  REGISTRY: europe-west1-docker.pkg.dev
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REPOSITORY: mlops-images
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # Required for Workload Identity Federation
+      id-token: write
 
     strategy:
       matrix:
@@ -39,21 +11,15 @@ jobs:
           - name: train
             dockerfile: dockerfiles/train.dockerfile
             context: .
-          # API disabled until Person D implements it
-          # - name: api
-          #   dockerfile: dockerfiles/api.dockerfile
-          #   context: .
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug - Check environment variables
+      # Fixes the newline issue in the secret
+      - name: Sanitize Project ID
         run: |
-          echo "REGISTRY: ${{ env.REGISTRY }}"
-          echo "PROJECT_ID: ${{ env.PROJECT_ID }}"
-          echo "REPOSITORY: ${{ env.REPOSITORY }}"
-          echo "PROJECT_ID is set: ${{ env.PROJECT_ID != '' }}"
+          echo "PROJECT_ID=$(echo "${{ secrets.GCP_PROJECT_ID }}" | tr -d '\n' | tr -d '\r')" >> $GITHUB_ENV
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -83,7 +49,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
-
-      - name: Image digest
-        run: |
-          echo "Image pushed: ${{ steps.tags.outputs.tags }}"
