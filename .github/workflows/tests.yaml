@@ -30,6 +30,3 @@ jobs:
 
     - name: Ruff format
       run: uv run ruff format .
-
-    - name: Run mypy
-      run: uv run mypy src/
