@@ -24,13 +24,10 @@ jobs:
         
     - name: Install dependencies
       run: |
-      # assume ruff is in the dev dependencies, else you can add with
-      # uv add --dev ruff
-      uv sync --dev --locked
+        uv sync --dev --locked
       
     - name: Ruff check
       run: uv run ruff check .
       
     - name: Ruff format
       run: uv run ruff format .
-
