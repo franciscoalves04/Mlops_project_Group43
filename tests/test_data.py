@@ -4,10 +4,7 @@ import torch
 
 from eye_diseases_classification.data import MyDataset, normalize_image
 
-DATA_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "../data/processed/test"
-)
+DATA_PATH = os.path.join(os.path.dirname(__file__), "../data/processed/test")
 
 
 @pytest.mark.skipif(not os.path.exists(DATA_PATH), reason="Data folder not found")
@@ -27,8 +24,8 @@ def test_dataset_loading():
 
     # Check that all labels are represented
     labels = [dataset[i][1] for i in range(len(dataset))]
-    for l in range(4):
-        assert l in labels, f"Label {l} missing from dataset"
+    for label in range(4):
+        assert label in labels, f"Label {label} missing from dataset"
 
 
 def test_normalize_image_shape():

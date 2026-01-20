@@ -1,15 +1,15 @@
 """
- Unit tests for the ResNet model in eye_diseases_classification.model.
- usage: uv run pytest tests/test_model.py -v 
- Test Classes:
-    TestModelConstruction - Tests model initialization with default/custom parameters, hyperparameter saving, layer architecture, and loss function
-    TestModelForward - Tests forward pass output shape/type, gradient flow, NaN handling, and various batch sizes
-    TestModelTrainingStep - Tests training step loss computation and return values
-    TestModelValidationStep - Tests validation step behavior
-    TestModelTestStep - Tests test step behavior
-    TestModelOptimizer - Tests optimizer and scheduler configuration, weight decay, and learning rates
-    TestModelTraining - Tests end-to-end training with PyTorch Lightning, parameter updates, and model behavior
-    TestModelLossComputation - Tests loss values and convergence during training
+Unit tests for the ResNet model in eye_diseases_classification.model.
+usage: uv run pytest tests/test_model.py -v
+Test Classes:
+   TestModelConstruction - Tests model initialization with default/custom parameters, hyperparameter saving, layer architecture, and loss function
+   TestModelForward - Tests forward pass output shape/type, gradient flow, NaN handling, and various batch sizes
+   TestModelTrainingStep - Tests training step loss computation and return values
+   TestModelValidationStep - Tests validation step behavior
+   TestModelTestStep - Tests test step behavior
+   TestModelOptimizer - Tests optimizer and scheduler configuration, weight decay, and learning rates
+   TestModelTraining - Tests end-to-end training with PyTorch Lightning, parameter updates, and model behavior
+   TestModelLossComputation - Tests loss values and convergence during training
 """
 
 import torch
@@ -18,6 +18,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from eye_diseases_classification.model import ResNet
 
+
 class TestModelConstruction:
     """Test model initialization and architecture."""
 
@@ -25,14 +26,16 @@ class TestModelConstruction:
         model = ResNet()
 
         assert isinstance(model, ResNet), "Model is not a ResNet instance"
-        assert hasattr(model, 'fc'), "Model missing fully connected layer"
-        assert hasattr(model, 'criterion'), "Model missing loss function"
+        assert hasattr(model, "fc"), "Model missing fully connected layer"
+        assert hasattr(model, "criterion"), "Model missing loss function"
 
     def test_model_initialization_custom_classes(self):
         num_classes = 8
         model = ResNet(num_classes=num_classes)
 
-        assert model.fc.out_features == num_classes, f"Output classes mismatch: {model.fc.out_features} != {num_classes}"
+        assert (
+            model.fc.out_features == num_classes
+        ), f"Output classes mismatch: {model.fc.out_features} != {num_classes}"
 
     def test_model_initialization_custom_lr(self):
         custom_lr = 5e-4
@@ -51,12 +54,12 @@ class TestModelConstruction:
     def test_model_layers_exist(self):
         model = ResNet()
 
-        assert hasattr(model, 'layer1'), "Missing layer1"
-        assert hasattr(model, 'layer2'), "Missing layer2"
-        assert hasattr(model, 'layer3'), "Missing layer3"
-        assert hasattr(model, 'layer4'), "Missing layer4"
-        assert hasattr(model, 'avgpool'), "Missing average pooling"
-        assert hasattr(model, 'dropout'), "Missing dropout layer"
+        assert hasattr(model, "layer1"), "Missing layer1"
+        assert hasattr(model, "layer2"), "Missing layer2"
+        assert hasattr(model, "layer3"), "Missing layer3"
+        assert hasattr(model, "layer4"), "Missing layer4"
+        assert hasattr(model, "avgpool"), "Missing average pooling"
+        assert hasattr(model, "dropout"), "Missing dropout layer"
 
     def test_model_dropout_rate(self):
         model = ResNet()
@@ -227,8 +230,7 @@ class TestModelOptimizer:
 
         assert "scheduler" in scheduler_config, "Missing scheduler in config"
         assert isinstance(
-            scheduler_config["scheduler"],
-            torch.optim.lr_scheduler.ReduceLROnPlateau
+            scheduler_config["scheduler"], torch.optim.lr_scheduler.ReduceLROnPlateau
         ), "Scheduler should be ReduceLROnPlateau"
 
     def test_optimizer_weight_decay(self):
@@ -238,7 +240,7 @@ class TestModelOptimizer:
 
         # Check weight decay parameter
         for param_group in optimizer.param_groups:
-            assert param_group['weight_decay'] == 1e-4, f"Weight decay mismatch: {param_group['weight_decay']}"
+            assert param_group["weight_decay"] == 1e-4, f"Weight decay mismatch: {param_group['weight_decay']}"
 
     def test_optimizer_learning_rate(self):
         lr = 2e-3
@@ -247,7 +249,7 @@ class TestModelOptimizer:
         optimizer = optimizer_config["optimizer"]
 
         for param_group in optimizer.param_groups:
-            assert param_group['lr'] == lr, f"Learning rate mismatch: {param_group['lr']} != {lr}"
+            assert param_group["lr"] == lr, f"Learning rate mismatch: {param_group['lr']} != {lr}"
 
 
 class TestModelTraining:

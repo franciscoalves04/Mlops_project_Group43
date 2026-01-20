@@ -15,11 +15,11 @@ from torch.utils.data import DataLoader
 from eye_diseases_classification.data import MyDataset
 from eye_diseases_classification.model import ResNet
 
-import shutil  
-from google.cloud import storage 
+from google.cloud import storage
 
 try:
     import wandb
+
     WANDB_AVAILABLE = True
 except ImportError:
     WANDB_AVAILABLE = False
@@ -31,12 +31,7 @@ class MetricsCallback(Callback):
     """Track metrics for plotting."""
 
     def __init__(self):
-        self.metrics = {
-            "train_loss": [],
-            "train_acc": [],
-            "val_loss": [],
-            "val_acc": []
-        }
+        self.metrics = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
 
     def on_train_epoch_end(self, trainer, pl_module):
         self.metrics["train_loss"].append(trainer.callback_metrics.get("train_loss", 0).item())
@@ -65,21 +60,19 @@ class ModelArtifactCallback(Callback):
 
         # Create artifact with both final model and best checkpoint
         artifact = wandb.Artifact(
-            name="eye-diseases-model",
-            type="model",
-            description="Trained ResNet model on eye diseases dataset"
+            name="eye-diseases-model", type="model", description="Trained ResNet model on eye diseases dataset"
         )
-        
+
         # Add final model state dict
         artifact.add_file(final_model_path, name="final_model.pth")
-        
+
         # Add best checkpoint if it exists
-        if hasattr(trainer.checkpoint_callback, 'best_model_path') and trainer.checkpoint_callback.best_model_path:
+        if hasattr(trainer.checkpoint_callback, "best_model_path") and trainer.checkpoint_callback.best_model_path:
             best_ckpt_path = trainer.checkpoint_callback.best_model_path
             if os.path.exists(best_ckpt_path):
                 artifact.add_file(best_ckpt_path, name="best_checkpoint.ckpt")
                 log.info(f"Added best checkpoint to artifact: {best_ckpt_path}")
-        
+
         wandb.log_artifact(artifact)
         log.info(f"Model artifacts saved to WandB: {artifact.name}")
 
@@ -124,7 +117,7 @@ class TrainingCurveCallback(Callback):
 
         fig_path = os.path.join(self.reports_dir, "training_curves.png")
         os.makedirs(os.path.dirname(fig_path), exist_ok=True)
-        fig.savefig(fig_path, dpi=150, bbox_inches='tight')
+        fig.savefig(fig_path, dpi=150, bbox_inches="tight")
 
         # Log to wandb if available
         if WANDB_AVAILABLE and wandb.run:
@@ -133,6 +126,7 @@ class TrainingCurveCallback(Callback):
         plt.close(fig)
         log.info(f"Training curves saved to {fig_path}")
 
+
 def upload_local_directory_to_gcs(local_path: str, gcs_uri: str):
     """Uploads a local directory to a GCS URI."""
     if not gcs_uri.startswith("gs://"):
@@ -140,13 +134,13 @@ def upload_local_directory_to_gcs(local_path: str, gcs_uri: str):
         return
 
     log.info(f"Uploading artifacts from {local_path} to {gcs_uri}...")
-    
+
     # Parse bucket and prefix
     # URI format: gs://bucket-name/path/to/dir
     parts = gcs_uri[5:].split("/", 1)
     bucket_name = parts[0]
     prefix = parts[1] if len(parts) > 1 else ""
-    
+
     client = storage.Client()
     bucket = client.bucket(bucket_name)
 
@@ -157,7 +151,7 @@ def upload_local_directory_to_gcs(local_path: str, gcs_uri: str):
             # Create the relative path for the blob
             relative_path = local_file.relative_to(local_path)
             blob_path = os.path.join(prefix, relative_path)
-            
+
             blob = bucket.blob(blob_path)
             blob.upload_from_filename(str(local_file))
             log.info(f"Uploaded: {local_file.name}")
@@ -175,33 +169,21 @@ def main(cfg: DictConfig) -> None:
     torch.manual_seed(cfg.experiment.seed)
 
     # Initialize model with config parameters
-    model = ResNet(
-        num_classes=cfg.model.num_classes,
-        lr=cfg.model.learning_rate
-    )
+    model = ResNet(num_classes=cfg.model.num_classes, lr=cfg.model.learning_rate)
 
     # Load data
-    train_dataset = MyDataset(
-        cfg.paths.data_dir + "/train",
-        augment=cfg.data.augmentation.train
-    )
-    val_dataset = MyDataset(
-        cfg.paths.data_dir + "/val",
-        augment=cfg.data.augmentation.val
-    )
+    train_dataset = MyDataset(cfg.paths.data_dir + "/train", augment=cfg.data.augmentation.train)
+    val_dataset = MyDataset(cfg.paths.data_dir + "/val", augment=cfg.data.augmentation.val)
 
     train_loader = DataLoader(
         train_dataset,
         batch_size=cfg.training.batch_size,
         shuffle=True,
         num_workers=cfg.hardware.num_workers,
-        pin_memory=True
+        pin_memory=True,
     )
     val_loader = DataLoader(
-        val_dataset,
-        batch_size=cfg.training.batch_size,
-        num_workers=cfg.hardware.num_workers,
-        pin_memory=True
+        val_dataset, batch_size=cfg.training.batch_size, num_workers=cfg.hardware.num_workers, pin_memory=True
     )
 
     log.info(f"Training samples: {len(train_dataset)}")
@@ -221,7 +203,7 @@ def main(cfg: DictConfig) -> None:
         filename=cfg.training.checkpoint.filename,
         save_top_k=cfg.training.checkpoint.save_top_k,
         mode=cfg.training.checkpoint.mode,
-        verbose=True
+        verbose=True,
     )
     callbacks.append(checkpoint_callback)
 
@@ -231,12 +213,12 @@ def main(cfg: DictConfig) -> None:
             monitor=cfg.training.early_stopping.monitor,
             patience=cfg.training.early_stopping.patience,
             mode=cfg.training.early_stopping.mode,
-            verbose=True
+            verbose=True,
         )
         callbacks.append(early_stopping_callback)
 
     # Learning rate monitor
-    lr_monitor = LearningRateMonitor(logging_interval='epoch')
+    lr_monitor = LearningRateMonitor(logging_interval="epoch")
     callbacks.append(lr_monitor)
 
     # Training curves
@@ -253,10 +235,7 @@ def main(cfg: DictConfig) -> None:
 
     # CSV logger
     if cfg.logging.use_csv:
-        csv_logger = CSVLogger(
-            save_dir=cfg.logging.csv_save_dir,
-            name="eye_diseases_training"
-        )
+        csv_logger = CSVLogger(save_dir=cfg.logging.csv_save_dir, name="eye_diseases_training")
         loggers.append(csv_logger)
 
     # WandB logger
@@ -274,10 +253,7 @@ def main(cfg: DictConfig) -> None:
     # Profiler
     profiler = None
     if cfg.profiling.enabled:
-        profiler = PyTorchProfiler(
-            dirpath=cfg.profiling.dirpath,
-            filename=cfg.profiling.filename
-        )
+        profiler = PyTorchProfiler(dirpath=cfg.profiling.dirpath, filename=cfg.profiling.filename)
         log.info("PyTorch profiler enabled")
 
     # Trainer
@@ -306,10 +282,10 @@ def main(cfg: DictConfig) -> None:
     # Finish wandb run
     if cfg.logging.use_wandb and WANDB_AVAILABLE and wandb.run:
         wandb.finish()
-    
+
     # Upload artifacts to GCS if configured
     gcs_model_dir = os.environ.get("AIP_MODEL_DIR")
-    
+
     if gcs_model_dir:
         log.info(f"Found AIP_MODEL_DIR: {gcs_model_dir}")
         # Upload the local 'models' folder to the GCS bucket

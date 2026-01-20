@@ -6,7 +6,6 @@ from typing import Dict, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pytorch_lightning as pl
 import seaborn as sns
 import torch
 from sklearn.metrics import (
@@ -64,9 +63,7 @@ class ModelEvaluator:
         # Load test data
         log.info(f"Loading test data from {self.test_data_path}")
         self.test_dataset = MyDataset(self.test_data_path)
-        self.test_loader = DataLoader(
-            self.test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4
-        )
+        self.test_loader = DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=4)
 
         # Class names
         self.class_names = ["cataract", "diabetic_retinopathy", "glaucoma", "normal"]
@@ -127,9 +124,7 @@ class ModelEvaluator:
             "precision_macro": precision_score(self.targets, self.predictions, average="macro", zero_division=0),
             "recall_macro": recall_score(self.targets, self.predictions, average="macro", zero_division=0),
             "f1_macro": f1_score(self.targets, self.predictions, average="macro", zero_division=0),
-            "precision_weighted": precision_score(
-                self.targets, self.predictions, average="weighted", zero_division=0
-            ),
+            "precision_weighted": precision_score(self.targets, self.predictions, average="weighted", zero_division=0),
             "recall_weighted": recall_score(self.targets, self.predictions, average="weighted", zero_division=0),
             "f1_weighted": f1_score(self.targets, self.predictions, average="weighted", zero_division=0),
         }
