@@ -71,6 +71,11 @@ def health() -> Dict[str, Any]:
     return {"status": "ok", "device": app.state.device, "checkpoint": app.state.checkpoint_path}
 
 
+@app.get("/", status_code=HTTPStatus.OK)
+def root() -> Dict[str, Any]:
+    return {"message": "Welcome to the Eye Disease Classification Model API!"}
+
+
 @app.post("/classify", status_code=HTTPStatus.OK)
 async def classify(file: UploadFile = File(...)) -> Dict[str, Any]:
     if file.content_type is None or not file.content_type.startswith("image/"):
