@@ -34,6 +34,7 @@ jobs:
       contents: read
       id-token: write
 
+
     strategy:
       matrix:
         image:
@@ -42,6 +43,13 @@ jobs:
             context: .
 
     steps:
+      - name: Free Disk Space (Fast)
+        run: |
+          echo "Freeing space..."
+          sudo rm -rf /usr/local/lib/android  # deletes Android (saved ~9GB)
+          sudo rm -rf /usr/share/dotnet       # deletes .NET (saved ~4GB)
+          sudo rm -rf /opt/ghc                # deletes Haskell (saved ~3GB)
+          echo "Done! Space cleared."
       - name: Checkout code
         uses: actions/checkout@v4
 

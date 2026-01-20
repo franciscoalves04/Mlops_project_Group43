@@ -15,17 +15,24 @@ COPY src ./src
 RUN uv sync --frozen --no-dev
 
 # Runtime stage
-FROM pytorch/pytorch:2.4.0-cuda12.1-cudnn9-runtime
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
 
 WORKDIR /app
 
-# Install system dependencies if needed
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+# Install uv in runtime image
+COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
 
-# Copy virtual environment from builder
-COPY --from=builder /app/.venv /app/.venv
-COPY --from=builder /app/src /app/src
+# Copy dependency files
+COPY pyproject.toml uv.lock README.md ./
+
+# Install dependencies in runtime image (not builder's venv)
+RUN uv sync --frozen --no-dev --no-install-project
+
+# Copy source code
+COPY src ./src
+
+# Install the project in runtime image
+RUN uv sync --frozen --no-dev
 
 # Copy entrypoint script
 COPY dockerfiles/entrypoint.sh /app/entrypoint.sh
