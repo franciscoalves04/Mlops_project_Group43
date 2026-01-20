@@ -24,6 +24,7 @@ dependencies = [
     "numpy>=2.4.1",
     "omegaconf>=2.3.0",
     "pillow>=12.1.0",
+    "python-multipart>=0.0.21",
     "pytorch-lightning>=2.6.0",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",

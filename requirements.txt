@@ -1,0 +1,8 @@
+fastapi==0.115.6
+uvicorn==0.34.0
+python-multipart
+numpy==2.4.1
+pillow==12.1.0
+pytorch-lightning==2.6.0
+tqdm==4.67.1
+typer==0.15.1
