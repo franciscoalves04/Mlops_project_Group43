@@ -14,14 +14,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v7
       with:
         python-version: 3.12
 
     - name: Install dependencies
-      run: |
-        pip install ruff mypy
+      run: uv sync --dev --locked
 
     - name: Run tests with coverage
       run: |
@@ -29,10 +28,10 @@ jobs:
         uv run coverage report -m
 
     - name: Ruff check
-      run: ruff check .
+      run: uv run ruff check .
 
     - name: Ruff format
-      run: ruff format .
+      run: uv run ruff format .
 
     - name: Run mypy
-      run: mypy src/
+      run: uv run mypy src/
