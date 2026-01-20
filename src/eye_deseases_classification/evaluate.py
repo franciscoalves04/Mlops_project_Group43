@@ -3,7 +3,8 @@ import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from eye_deseases_classification.model import ResNet
 from eye_deseases_classification.data import MyDataset
-from eye_deseases_classification.logger import logger 
+from eye_deseases_classification.logger import logger
+
 
 def evaluate():
     logger.info("Starting evaluation script")
@@ -28,6 +29,7 @@ def evaluate():
     logger.info("Starting model testing")
     trainer.test(model, test_loader)
     logger.info("Evaluation completed successfully")
+
 
 if __name__ == "__main__":
     evaluate()

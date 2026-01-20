@@ -1,4 +1,5 @@
 """Simple training script without Hydra config - for backwards compatibility."""
+
 from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, LearningRateMonitor
@@ -24,17 +25,12 @@ def main():
         monitor="val_acc",
         mode="max",
         save_top_k=1,
-        verbose=True
+        verbose=True,
     )
 
-    early_stop_cb = EarlyStopping(
-        monitor="val_loss",
-        patience=10,
-        mode="min",
-        verbose=True
-    )
+    early_stop_cb = EarlyStopping(monitor="val_loss", patience=10, mode="min", verbose=True)
 
-    lr_monitor = LearningRateMonitor(logging_interval='epoch')
+    lr_monitor = LearningRateMonitor(logging_interval="epoch")
 
     # Logger
     logger = CSVLogger(save_dir="logs", name="simple_training")
