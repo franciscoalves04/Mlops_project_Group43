@@ -22,7 +22,6 @@ jobs:
       id-token: write
 
     steps:
-      # 1. Determine which branch triggered this run
       - name: Determine Branch Name
         id: get_branch
         run: |
@@ -44,7 +43,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-        # Important: Checkout the code from the TRIGGERING branch, not default
         with:
           ref: ${{ steps.get_branch.outputs.branch }}
 
@@ -67,16 +65,24 @@ jobs:
           gcloud auth configure-docker ${{ env.REGISTRY }}
 
       - name: Submit Vertex AI Custom Training Job
+        id: submit_job
         run: |
-          # USE THE DYNAMIC BRANCH NAME HERE
           TARGET_BRANCH="${{ steps.get_branch.outputs.branch }}"
           IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${TARGET_BRANCH}"
+          
+          # Create unique ID and Output Path to prevent overwriting previous models
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          JOB_NAME="train-${TARGET_BRANCH}-${TIMESTAMP}"
+          JOB_OUTPUT_DIR="gs://mlops-models-${{ env.PROJECT_ID }}/training-output/${JOB_NAME}"
+
+          # Export this variable so the next step can download from here
+          echo "JOB_OUTPUT_DIR=$JOB_OUTPUT_DIR" >> $GITHUB_ENV
           
           echo "Preparing job for image: $IMAGE_URI"
 
           cat > config.yaml <<EOF
           baseOutputDirectory:
-            outputUriPrefix: gs://mlops-models-${{ env.PROJECT_ID }}/training-output/
+            outputUriPrefix: $JOB_OUTPUT_DIR
           workerPoolSpecs:
             - machineSpec:
                 machineType: n1-standard-4
@@ -93,13 +99,97 @@ jobs:
                 args: []
           EOF
 
-          gcloud ai custom-jobs create \
-            --display-name="train-${TARGET_BRANCH}-$(date +%Y%m%d-%H%M%S)" \
+          JOB_RESPONSE=$(gcloud ai custom-jobs create \
+            --display-name="$JOB_NAME" \
             --project=${{ env.PROJECT_ID }} \
             --region=${{ env.REGION }} \
-            --config=config.yaml
+            --config=config.yaml \
+            --format="value(name)")
+          
+          # Extract Job ID correctly
+          JOB_ID=$(echo $JOB_RESPONSE | cut -d'/' -f6)
+          echo "job_id=$JOB_ID" >> $GITHUB_OUTPUT
+          echo "Submitted training job: $JOB_ID"
 
       - name: Print Job Submission Status
         run: |
           echo "Training job submitted successfully!"
           echo "Monitor progress at: https://console.cloud.google.com/vertex-ai/training/custom-jobs?project=${{ env.PROJECT_ID }}"
+
+      # --- CHANGED: UPLOAD TO ARTIFACT REGISTRY ---
+      - name: Upload trained model to Artifact Registry
+        if: steps.submit_job.outcome == 'success'
+        run: |
+          JOB_ID="${{ steps.submit_job.outputs.job_id }}"
+          echo "Waiting for training job $JOB_ID to complete..."
+          
+          # 1. Wait Loop
+          MAX_WAIT=7200
+          ELAPSED=0
+          WAIT_INTERVAL=30
+          
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            JOB_STATE=$(gcloud ai custom-jobs describe $JOB_ID \
+              --project=${{ env.PROJECT_ID }} \
+              --region=${{ env.REGION }} \
+              --format="value(state)")
+            
+            echo "Job state: $JOB_STATE (waited $ELAPSED seconds)"
+            
+            if [ "$JOB_STATE" == "JOB_STATE_SUCCEEDED" ]; then
+              echo "Training job completed successfully!"
+              break
+            elif [ "$JOB_STATE" == "JOB_STATE_FAILED" ] || [ "$JOB_STATE" == "JOB_STATE_CANCELLED" ]; then
+              echo "Training job failed or was cancelled!"
+              exit 1
+            fi
+            
+            sleep $WAIT_INTERVAL
+            ELAPSED=$((ELAPSED + WAIT_INTERVAL))
+          done
+          
+          if [ $ELAPSED -ge $MAX_WAIT ]; then
+            echo "Timeout waiting for training job to complete"
+            exit 1
+          fi
+          
+          # 2. Prepare Artifacts
+          mkdir -p model-package
+          
+          # Download ONLY this job's output using the env var we set in the previous step
+          echo "Downloading output from: ${{ env.JOB_OUTPUT_DIR }}"
+          gsutil -m cp -r "${{ env.JOB_OUTPUT_DIR }}/*" model-package/
+          
+          # Create metadata
+          cat > model-package/metadata.json <<EOF
+          {
+            "name": "eye-diseases-model",
+            "job_id": "$JOB_ID",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ steps.get_branch.outputs.branch }}",
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+          EOF
+          
+          # Zip it up
+          tar -czf model.tar.gz -C model-package .
+
+          # 3. Upload to Artifact Registry
+          echo "Uploading to Artifact Registry..."
+          
+          # Use short SHA for versioning
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          VERSION="${{ steps.get_branch.outputs.branch }}-${SHORT_SHA}"
+          
+          # Ensure repository exists (optional safeguard)
+          # gcloud artifacts repositories create mlops-models --repository-format=generic --location=${{ env.REGION }} --description="Model artifacts" || true
+
+          gcloud artifacts generic upload \
+            --package="eye-diseases-model" \
+            --version="$VERSION" \
+            --source="model.tar.gz" \
+            --repository="mlops-models" \
+            --location="${{ env.REGION }}" \
+            --project="${{ env.PROJECT_ID }}"
+
+          echo "Upload complete! Package: mlops-models/eye-diseases-model Version: $VERSION"
