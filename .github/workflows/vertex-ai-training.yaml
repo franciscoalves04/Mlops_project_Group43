@@ -116,14 +116,13 @@ jobs:
           echo "Training job submitted successfully!"
           echo "Monitor progress at: https://console.cloud.google.com/vertex-ai/training/custom-jobs?project=${{ env.PROJECT_ID }}"
 
-      # --- CHANGED: UPLOAD TO ARTIFACT REGISTRY ---
       - name: Upload trained model to Artifact Registry
         if: steps.submit_job.outcome == 'success'
         run: |
           JOB_ID="${{ steps.submit_job.outputs.job_id }}"
           echo "Waiting for training job $JOB_ID to complete..."
           
-          # 1. Wait Loop
+          # 1. Wait Loop (Standard Polling)
           MAX_WAIT=7200
           ELAPSED=0
           WAIT_INTERVAL=30
@@ -134,36 +133,49 @@ jobs:
               --region=${{ env.REGION }} \
               --format="value(state)")
             
-            echo "Job state: $JOB_STATE (waited $ELAPSED seconds)"
-            
             if [ "$JOB_STATE" == "JOB_STATE_SUCCEEDED" ]; then
               echo "Training job completed successfully!"
               break
             elif [ "$JOB_STATE" == "JOB_STATE_FAILED" ] || [ "$JOB_STATE" == "JOB_STATE_CANCELLED" ]; then
-              echo "Training job failed or was cancelled!"
+              echo "Training job failed!"
               exit 1
             fi
-            
             sleep $WAIT_INTERVAL
             ELAPSED=$((ELAPSED + WAIT_INTERVAL))
           done
           
-          if [ $ELAPSED -ge $MAX_WAIT ]; then
-            echo "Timeout waiting for training job to complete"
-            exit 1
-          fi
-          
           # 2. Prepare Artifacts
           mkdir -p model-package
           
-          # Download ONLY this job's output using the env var we set in the previous step
+          # Download files
           echo "Downloading output from: ${{ env.JOB_OUTPUT_DIR }}"
           gsutil -m cp -r "${{ env.JOB_OUTPUT_DIR }}/*" model-package/
           
+          # --- NEW LOGIC: EXTRACT ACCURACY ---
+          # Find the checkpoint file. Example: best_model-epoch=05-val_acc=0.92.ckpt
+          CKPT_FILE=$(find model-package -name "best_model*.ckpt" | head -n 1)
+          
+          if [ -n "$CKPT_FILE" ]; then
+            echo "Found checkpoint: $CKPT_FILE"
+            # Regex explanation: Look for 'val_acc=' and capture the digits/dots immediately after
+            ACCURACY=$(echo "$CKPT_FILE" | grep -oP 'val_acc=\K[\d\.]+')
+          else
+            echo "No checkpoint file found!"
+            ACCURACY="unknown"
+          fi
+          
+          if [ -z "$ACCURACY" ]; then
+             ACCURACY="unknown"
+          fi
+          
+          echo "Detected Model Accuracy: $ACCURACY"
+          # -----------------------------------
+
           # Create metadata
           cat > model-package/metadata.json <<EOF
           {
             "name": "eye-diseases-model",
+            "accuracy": "$ACCURACY",
             "job_id": "$JOB_ID",
             "commit": "${{ github.sha }}",
             "branch": "${{ steps.get_branch.outputs.branch }}",
@@ -174,15 +186,16 @@ jobs:
           # Zip it up
           tar -czf model.tar.gz -C model-package .
 
-          # 3. Upload to Artifact Registry
+          # 3. Upload with Accuracy in Version
           echo "Uploading to Artifact Registry..."
           
-          # Use short SHA for versioning
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          VERSION="${{ steps.get_branch.outputs.branch }}-${SHORT_SHA}"
           
-          # Ensure repository exists (optional safeguard)
-          # gcloud artifacts repositories create mlops-models --repository-format=generic --location=${{ env.REGION }} --description="Model artifacts" || true
+          # Format: branch-sha-acc0.95
+          VERSION="${{ steps.get_branch.outputs.branch }}-${SHORT_SHA}-acc${ACCURACY}"
+          
+          # Sanitize version string (replace illegal chars just in case)
+          VERSION=$(echo "$VERSION" | sed 's/[^a-zA-Z0-9._-]/./g')
 
           gcloud artifacts generic upload \
             --package="eye-diseases-model" \
@@ -192,4 +205,4 @@ jobs:
             --location="${{ env.REGION }}" \
             --project="${{ env.PROJECT_ID }}"
 
-          echo "Upload complete! Package: mlops-models/eye-diseases-model Version: $VERSION"
+          echo "Upload complete! Version: $VERSION"
