@@ -84,5 +84,4 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${{ github.ref_name }}
             ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${{ github.ref_name }}-${{ hashFiles('**/pyproject.toml') }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
           provenance: false
