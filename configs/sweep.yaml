@@ -1,0 +1,97 @@
+# Weights & Biases Hyperparameter Optimization Sweep Configuration
+# Run with: wandb sweep configs/sweep.yaml
+# Then: wandb agent <sweep-id>
+
+# The number of training runs depends on the sweep configuration.
+# Method: bayes - Runs continuously, learning from previous runs to suggest better hyperparameters
+# Method: grid - Runs every combination (would be thousands in your case)
+# Method: random - Runs indefinitely until stopped
+program: src/eye_deseases_classification/train.py
+method: bayes  # random, grid, bayes
+metric:
+  name: val_acc
+  goal: maximize
+
+# Early termination to stop poorly performing runs
+early_terminate:
+  type: hyperband
+  min_iter: 5
+  eta: 2
+  s: 3
+
+parameters:
+  # Training hyperparameters
+  training.learning_rate:
+    distribution: log_uniform_values
+    min: 0.00001
+    max: 0.01
+  
+  training.batch_size:
+    values: [32, 64, 128]
+  
+  training.weight_decay:
+    distribution: log_uniform_values
+    min: 0.00001
+    max: 0.001
+  
+  training.optimizer:
+    values: ["adam", "adamw", "sgd"]
+  
+  # Model architecture hyperparameters
+  model.dropout:
+    distribution: uniform
+    min: 0.2
+    max: 0.6
+  
+  model.conv1_channels:
+    values: [32, 64, 128]
+  
+  model.conv2_channels:
+    values: [64, 128, 256]
+  
+  model.conv3_channels:
+    values: [128, 256, 512]
+  
+  model.conv4_channels:
+    values: [256, 512, 1024]
+  
+  # Learning rate scheduler
+  training.scheduler.type:
+    values: ["reduce_on_plateau", "cosine", "step"]
+  
+  training.scheduler.factor:
+    distribution: uniform
+    min: 0.3
+    max: 0.7
+  
+  training.scheduler.patience:
+    values: [3, 5, 7]
+  
+  # Data augmentation
+  data.image_size:
+    values: [[224, 224], [256, 256], [384, 384]]
+  
+  # Fixed parameters (can be overridden)
+  training.epochs:
+    value: 30
+  
+  experiment.seed:
+    value: 42
+  
+  logging.use_wandb:
+    value: true
+  
+  logging.wandb_project:
+    value: "eye-diseases-classification-sweep"
+
+# Command to run with Hydra compatibility
+command:
+  - ${env}
+  - uv
+  - run
+  - python
+  - ${program}
+  - ${args_no_hyphens}
+
+# Uncomment to limit the number of runs
+# run_cap: 20  # Stop after 20 runs
