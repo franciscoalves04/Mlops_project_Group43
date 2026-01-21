@@ -122,7 +122,7 @@ jobs:
           JOB_ID="${{ steps.submit_job.outputs.job_id }}"
           echo "Waiting for training job $JOB_ID to complete..."
           
-          # 1. Wait Loop (Standard Polling)
+          # 1. Wait Loop
           MAX_WAIT=7200
           ELAPSED=0
           WAIT_INTERVAL=30
@@ -147,20 +147,18 @@ jobs:
           # 2. Prepare Artifacts
           mkdir -p model-package
           
-          # Download files
           echo "Downloading output from: ${{ env.JOB_OUTPUT_DIR }}"
           gsutil -m cp -r "${{ env.JOB_OUTPUT_DIR }}/*" model-package/
           
-          # --- NEW LOGIC: EXTRACT ACCURACY ---
-          # Find the checkpoint file. Example: best_model-epoch=05-val_acc=0.92.ckpt
+          # --- FIXED LOGIC START ---
           CKPT_FILE=$(find model-package -name "best_model*.ckpt" | head -n 1)
           
           if [ -n "$CKPT_FILE" ]; then
             echo "Found checkpoint: $CKPT_FILE"
-            # Regex explanation: Look for 'val_acc=' and capture the digits/dots immediately after
-            ACCURACY=$(echo "$CKPT_FILE" | grep -oP 'val_acc=\K[\d\.]+')
+            # FIX 1: Stricter Regex. Only capture 'digits.digits'
+            # This ignores the trailing '.' from .ckpt
+            ACCURACY=$(echo "$CKPT_FILE" | grep -oP 'val_acc=\K\d+\.\d+')
           else
-            echo "No checkpoint file found!"
             ACCURACY="unknown"
           fi
           
@@ -169,7 +167,6 @@ jobs:
           fi
           
           echo "Detected Model Accuracy: $ACCURACY"
-          # -----------------------------------
 
           # Create metadata
           cat > model-package/metadata.json <<EOF
@@ -183,19 +180,20 @@ jobs:
           }
           EOF
           
-          # Zip it up
           tar -czf model.tar.gz -C model-package .
 
-          # 3. Upload with Accuracy in Version
           echo "Uploading to Artifact Registry..."
           
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           
-          # Format: branch-sha-acc0.95
-          VERSION="${{ steps.get_branch.outputs.branch }}-${SHORT_SHA}-acc${ACCURACY}"
+          # Construct raw version string
+          RAW_VERSION="${{ steps.get_branch.outputs.branch }}-${SHORT_SHA}-acc${ACCURACY}"
           
-          # Sanitize version string (replace illegal chars just in case)
-          VERSION=$(echo "$VERSION" | sed 's/[^a-zA-Z0-9._-]/./g')
+          # FIX 2: Sanitize Version ID
+          # 1. Convert to LOWERCASE (Fixes 'Automation' -> 'automation')
+          # 2. Replace invalid chars with '.'
+          # 3. Strip leading/trailing dots/dashes
+          VERSION=$(echo "$RAW_VERSION" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/./g' | sed 's/^[.-]*//;s/[.-]*$//')
 
           gcloud artifacts generic upload \
             --package="eye-diseases-model" \
