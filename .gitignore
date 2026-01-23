@@ -94,7 +94,8 @@ models/
 # Logs
 logs/
 lightning_logs/
-reports/
+reports/*
+!reports/README.md
 
 # Hydra outputs
 outputs/
