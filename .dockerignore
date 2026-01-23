@@ -47,10 +47,7 @@ reports/
 # Data (exclude from image, use volumes)
 data/
 
-# Models (exclude from image, use volumes)
-models/
-*.pth
-*.ckpt
+
 
 # Logs
 logs/

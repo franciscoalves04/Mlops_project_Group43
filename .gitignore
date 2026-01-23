@@ -76,6 +76,8 @@ cover/
 data/processed/
 data/raw/
 
+download_temp/
+
 # Models
 models/
 *.pth
@@ -198,6 +200,7 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

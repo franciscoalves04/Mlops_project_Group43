@@ -1,0 +1,128 @@
+name: Deploy App to Cloud Run
+
+on:
+  workflow_run:
+    workflows: ["Train Model on Vertex AI"]
+    types: [completed]
+    branches: [main, Automation]
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: europe-west1
+  REGISTRY: europe-west1-docker.pkg.dev
+  REPO_NAME: mlops-images
+  API_SERVICE: eye-disease-api
+  FRONTEND_SERVICE: eye-disease-frontend
+
+jobs:
+  deploy-api:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      api_url: ${{ steps.get_url.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auth & Setup Cloud SDK
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Install uv & dependencies
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: 3.12
+      
+      - name: Install PyTorch (CPU version)
+        run: |
+          uv sync --frozen
+          # Force reinstall CPU torch to save time and avoid driver errors
+          uv pip install --force-reinstall torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Fetch and Convert Model
+        run: |
+          chmod +x scripts/fetch_and_convert.sh
+          ./scripts/fetch_and_convert.sh ${{ env.PROJECT_ID }} ${{ env.REGION }}
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      - name: Build & Push API Image
+        run: |
+          IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.API_SERVICE }}:${{ github.sha }}"
+          # Note: The Dockerfile copies models/model.onnx we just generated
+          docker build -t $IMAGE_URI -f dockerfiles/api.dockerfile .
+          docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+      - name: Deploy API to Cloud Run
+        id: deploy
+        run: |
+          gcloud run deploy ${{ env.API_SERVICE }} \
+            --image ${{ env.IMAGE_URI }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 1Gi
+
+      - name: Get API URL
+        id: get_url
+        run: |
+          # We need this URL to pass to the frontend
+          URL=$(gcloud run services describe ${{ env.API_SERVICE }} --region ${{ env.REGION }} --format 'value(status.url)')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+  deploy-frontend:
+    needs: deploy-api # Waits for backend to finish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auth & Setup Cloud SDK
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      - name: Build & Push Frontend Image
+        run: |
+          IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.FRONTEND_SERVICE }}:${{ github.sha }}"
+          docker build -t $IMAGE_URI -f dockerfiles/frontend.dockerfile .
+          docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+      - name: Deploy Frontend to Cloud Run
+        run: |
+          # Retrieve URL from the previous job
+          API_URL="${{ needs.deploy-api.outputs.api_url }}"
+          
+          echo "Connecting Frontend to Backend at: $API_URL"
+          
+          gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
+            --image ${{ env.IMAGE_URI }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 512Mi \
+            --set-env-vars API_URL=$API_URL
