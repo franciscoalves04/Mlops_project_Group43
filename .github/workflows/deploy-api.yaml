@@ -73,7 +73,8 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --memory 1Gi
+            --memory 1Gi \
+            --set-env-vars PREDICTION_LOG_BUCKET=group43-prediction-logs
 
       - name: Get API URL
         id: get_url
@@ -126,3 +127,43 @@ jobs:
             --allow-unauthenticated \
             --memory 512Mi \
             --set-env-vars API_URL=$API_URL
+  deploy-monitoring:
+    needs: deploy-api # Optional: wait for API, or run in parallel
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auth & Setup Cloud SDK
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
+
+      - name: Build & Push Monitoring Image
+        run: |
+          # naming the service 'eye-disease-monitoring'
+          IMAGE_URI="${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/eye-disease-monitoring:${{ github.sha }}"
+          docker build -t $IMAGE_URI -f dockerfiles/monitoring.dockerfile .
+          docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+      - name: Deploy Monitoring to Cloud Run
+        run: |
+          gcloud run deploy eye-disease-monitoring \
+            --image ${{ env.IMAGE_URI }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 1Gi \
+            --set-env-vars BUCKET_NAME=group43-prediction-logs,LOG_PREFIX=prediction_logs,REFERENCE_BLOB=reference/reference_features.csv

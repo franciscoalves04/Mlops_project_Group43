@@ -309,7 +309,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 12 fill here ---
+We used Hydra for hierarchical configuration management with YAML config files in `src/eye_diseases_classification/conf/`. To run experiments with default config: `uv run train`. To override parameters: `uv run train training.batch_size=32 model.learning_rate=0.0005`. To run pre-defined experiments: `uv run train +experiment=high_lr` or `+experiment=large_batch`. Hydra auto-saves all configs to timestamped output folders, ensuring full reproducibility of every experiment run.
 
 ### Question 13
 
@@ -324,7 +324,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 13 fill here ---
+We secured reproducibility through multiple mechanisms. Whenever an experiment is run, Hydra automatically creates a timestamped output folder (e.g., `outputs/2024-01-19/18-30-45/`) and saves the entire configuration in `.hydra/config.yaml`. We set a fixed random seed (`torch.manual_seed(42)`) in train.py and PyTorch Lightning's deterministic flag to ensure consistent results across runs. All training metrics, hyperparameters, and model artifacts are logged to WandB with experiment-specific IDs. Additionally, exact dependency versions are locked in `uv.lock`, ensuring identical environments across machines. To reproduce an experiment, one would: 1) check the saved config in the outputs folder, 2) run `uv run train` with the same CLI overrides, or 3) reference the exact WandB run ID which stores all hyperparameters and outputs. This comprehensive approach ensures no information is lost and all experiments remain fully reproducible.
 
 ### Question 14
 
@@ -341,7 +341,16 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 14 fill here ---
+We integrated Weights & Biases (W&B) into our training pipeline to comprehensively track all aspects of our experiments. As seen in the first image, we track training and validation loss across all epochs for all experiments, which informs us about model convergence and whether the model is overfitting or underfitting. Training loss should decrease monotonically while validation loss reveals if the model generalizes well to unseen data. Paired with loss metrics, we also track training and validation accuracy, which directly measure classification performance on the eye disease dataset. These metrics are critical because they show how well our model learns the underlying patterns.
+
+As seen in the second image, we log all hyperparameters used in each experiment, including learning rate, batch size, model architecture parameters (conv channels, dropout), scheduler settings, and early stopping patience. This is essential for reproducibility and for understanding which hyperparameter configurations lead to better performance. W&B automatically captures these alongside system metrics like GPU memory usage and epoch duration, providing complete context for each run.
+
+In the third image, we visualize the training curves (loss and accuracy plots) which are automatically generated and logged. These visualizations make it easy to identify training dynamics at a glance—detecting overfitting patterns, learning plateaus, or convergence issues. Beyond metrics, we also log model artifacts including the best checkpoint and final model state dict to W&B, enabling easy model versioning and comparison across experiments. This comprehensive tracking allows us to compare multiple experimental runs, identify which configurations work best, and maintain a complete audit trail of our model development process. W&B's dashboard enables team collaboration by allowing all members to view and compare experiments in real-time.
+
+![WandB Experiments Overview](figures/WandB_overview.png)
+![WandB Parameters](figures/wandb_parameters.png)
+![WandB Logged Image (metrics)](figures/wandb_logged_image.png)
+
 
 ### Question 15
 
@@ -356,7 +365,24 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 15 fill here ---
+For our project, we developed multiple Docker images: a training container (PyTorch-based with GPU support), an API inference container (FastAPI-based), and an optional frontend container (Streamlit-based). The training image uses a multi-stage build optimizing for cloud deployment with CUDA 12.4 support, while the API image is lightweight for efficient serving. Both images include environment isolation and non-root user execution for security.
+
+To run the training container locally with GPU support:
+```
+docker run --gpus all -v ./data:/app/data -v ./models:/app/models \
+  eye-diseases-train:latest
+```
+
+To run the API container:
+```
+docker run -p 8000:8000 -v ./models:/app/models:ro eye-diseases-api:latest
+```
+
+Alternatively, we use `docker-compose up` to orchestrate both services. The training image includes an entrypoint script that automatically downloads preprocessed data from Google Cloud Storage before training begins. All Docker images are automatically built and pushed to Google Artifact Registry through our GitHub Actions CI/CD pipeline on every code commit.
+
+Link to training dockerfile: [dockerfiles/train.dockerfile](https://github.com/franciscoalves04/Mlops_project_Group43/blob/main/dockerfiles/train.dockerfile). 
+
+NOTE: For building and running the training image, we did not make use of caching, as the Github Action Workflow was running out of space. 
 
 ### Question 16
 
@@ -371,7 +397,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 16 fill here ---
+Debugging was done mostly by the help of co-pilot. This was done by adding the python file as context and pasting the exact whole error that is outputted in the terminal. For profiling, this was done once locally on one of our members' GPU to see if there was a CPU bottleneck, which there was. To use more training time on the GPU, we bumped the batch_size up. 
 
 ## Working in the cloud
 
@@ -388,7 +414,15 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following GCP services in our project:
+
+1. **Cloud Storage (GCS Buckets)**: Used for storing processed training data (gs://mlops-data-*.../processed) and models (gs://mlops-models-...). This provides scalable, reliable storage for both input data and trained model outputs.
+
+2. **Vertex AI (Custom Jobs)**: Used for cloud-based model training. We configured custom training jobs with GPU support (NVIDIA TESLA T4 GPU) to train our PyTorch Lightning models at scale without managing infrastructure directly.
+
+3. **Artifact Registry**: Used as a Docker registry to store and manage our training and API container images (europe-west1-docker.pkg.dev). Additionally, we store trained model artifacts with naming convention `*-acc0.XXX` to support ordering and filtering models by their validation accuracy, making it easy to identify and retrieve the best performing models. This integrates seamlessly with our CI/CD pipeline for automated image and model artifact management.
+
+4. **Workload Identity Federation**: Used to establish secure, keyless authentication between GitHub Actions workflows and GCP services. This enables our CI/CD pipeline to authenticate and access GCP resources without storing service account keys.
 
 ### Question 18
 
@@ -403,7 +437,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 18 fill here ---
+While Compute Engine is the backbone of GCP, we did not directly manage Compute Engine instances ourselves. Instead, we used Vertex AI Custom Training Jobs, which abstracts away the infrastructure management and automatically provisions the necessary compute resources. When submitting a training job to Vertex AI, we specified the machine type `n1-standard-4` with a single GPU (NVIDIA TESLA T4). Vertex AI then automatically creates the required Compute Engine VM in the background, installs our custom Docker training container from Artifact Registry, mounts the GCS data bucket, and runs the training job. This approach simplified our infrastructure management—we only needed to specify the job configuration, container image, and hyperparameters through the `gcloud ai custom-jobs create` command, without needing to manually provision, configure, or manage individual VM instances. Once training completes, Vertex AI automatically tears down the VM to avoid unnecessary costs. This managed approach reduced operational overhead while providing the scalability and GPU support we needed for model training.
 
 ### Question 19
 
@@ -411,8 +445,10 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 > **You can take inspiration from [this figure](figures/bucket.png).**
 >
 > Answer:
+[Buckets Overview](figures/buckets_overview.png)
+[Data Bucket](figures/buckets_data.png)
+[Models Bucket](figures/buckets_model.png)
 
---- question 19 fill here ---
 
 ### Question 20
 
@@ -421,7 +457,9 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 20 fill here ---
+[Image Artifacts](figures/artifact_images.png)
+[Model Artifacts](figures/artifact_models.png)
+
 
 ### Question 21
 
@@ -430,7 +468,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 21 fill here ---
+We did not use GCP Cloud Build for building Docker images. Instead, we leveraged GitHub Actions workflows for automated image building and pushing to Artifact Registry. Our `docker-build.yaml` workflow automatically triggers on code commits to build and push training and API images directly to `europe-west1-docker.pkg.dev/` using Docker's `build-push-action`. This approach provided better integration with our GitHub-based CI/CD pipeline and allowed us to manage all automation within GitHub Actions rather than using multiple GCP services. The built images are then stored in Artifact Registry with versioning based on git commit hash and branch name for easy tracking and retrieval during Vertex AI training job submissions.
 
 ### Question 22
 
@@ -445,7 +483,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 22 fill here ---
+Yes, we successfully trained our model in the cloud using Vertex AI Custom Training Jobs. Our GitHub Actions workflow (`vertex-ai-training.yaml`) automatically triggers after docker-build completes, submitting a custom training job to Vertex AI with the following setup: machine type `n1-standard-4` with one NVIDIA TESLA T4 GPU, our custom PyTorch training container from Artifact Registry, and Hydra configuration for experiment management. The workflow executes `gcloud ai custom-jobs create` to submit the job, then polls the job status every 30 seconds until completion (with a 2-hour timeout). Upon successful completion, the trained model is automatically uploaded to GCS with a versioned naming convention including accuracy metrics (`*-acc0.XXX`) for easy identification and retrieval. We chose Vertex AI over Compute Engine because it abstracts infrastructure management—we only specify job configuration and let Vertex AI handle VM provisioning, container deployment, data mounting, and cleanup. This managed approach significantly reduced operational complexity while providing reliable GPU-accelerated training at scale.
 
 ## Deployment
 
@@ -462,7 +500,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 23 fill here ---
+Yes, we successfully developed a FastAPI API for model inference. The API (`src/eye_diseases_classification/api.py`) provides three main endpoints: `/` (welcome), `/health` (health check returning model path), and `/classify` (main inference endpoint accepting image uploads). Special features include ONNX model inference using CPU execution provider (optimized for Cloud Run), automatic ImageNet normalization, and comprehensive error handling for unsupported image formats. The `/classify` endpoint returns prediction index, class name, and per-class probabilities. We additionally developed an optional Streamlit frontend (`src/eye_diseases_classification/frontend.py`) that connects to the API backend, allowing users to upload images and visualize predictions as bar charts. Both API and frontend are containerized with Docker for reproducibility. The API automatically picks the most recent ONNX model from the `models/` directory, with an optional `ONNX_PATH` environment variable for explicit model selection. This design enables easy local testing via `docker-compose up` and cloud deployment to Google Cloud Run.
 
 ### Question 24
 
@@ -478,7 +516,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 24 fill here ---
+Yes, we deployed our API both locally and to the cloud. **Locally**, we use `docker-compose up` which orchestrates the training container and API container, with the API exposed on `localhost:8000`. **In the cloud**, we deployed to Google Cloud Run via the `deploy-api.yaml` GitHub Actions workflow. The deployment pipeline automatically queries Artifact Registry to find the model with the highest accuracy (based on `*-acc0.XXX` naming convention), downloads it, and converts it from PyTorch Lightning checkpoint (.ckpt) to ONNX format using `export_onnx.py`. The ONNX model is then included in the API Docker image. The API runs on Cloud Run with CPU execution (optimized for inference), and we additionally deployed a Streamlit frontend to Cloud Run that connects to the API backend via the `API_URL` environment variable. To invoke the deployed API, users can call: `curl -X POST -F "file=@image.jpg" https://eye-disease-api-XXXXX.europe-west1.run.app/classify` or use the Streamlit UI at the frontend Cloud Run URL.
 
 ### Question 25
 
@@ -493,7 +531,7 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 >
 > Answer:
 
---- question 25 fill here ---
+For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationtests/test_apis.py`). Tests create a temporary dummy ONNX model and verify API endpoints: root returns a welcome message, and `/health` returns status "ok". We run unit tests automatically in CI/CD via GitHub Actions (`tests.yaml`) with coverage reporting. For load testing, we implemented Locust (`tests/performancetests/locustfile.py`) to simulate concurrent users with two tasks: health checks and `/classify` image classification requests. Locust mimics realistic traffic with wait times between 1-2 seconds and uses actual images from the dataset. However, Locust is not currently integrated into CI/CD—it's available for manual local testing to evaluate API performance under load. To use it: `uv run locust -f tests/performancetests/locustfile.py --host=http://localhost:8000`. Formal integration into CI/CD would enable automated performance regression detection and help identify optimization needs for production Cloud Run deployment.
 
 ### Question 26
 

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Callable, List, Tuple
 
 import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms as T
 import torchvision.transforms.functional as F
+
 
 @dataclass
 class OnnxInputSpec:
@@ -21,11 +21,7 @@ def find_latest_onnx_model(models_dir: str = "models") -> str:
     if not os.path.isdir(models_dir):
         raise FileNotFoundError(f"Models directory not found: {models_dir}")
 
-    onnx_files = [
-        os.path.join(models_dir, f)
-        for f in os.listdir(models_dir)
-        if f.endswith(".onnx")
-    ]
+    onnx_files = [os.path.join(models_dir, f) for f in os.listdir(models_dir) if f.endswith(".onnx")]
 
     if not onnx_files:
         raise FileNotFoundError(f"No .onnx models found in {models_dir}")
@@ -51,14 +47,13 @@ def infer_onnx_input_spec(onnx_path: str) -> OnnxInputSpec:
 
     return OnnxInputSpec(name=inp.name, c=c, h=h, w=w)
 
+
 def get_test_loader(spec: OnnxInputSpec) -> DataLoader:
     from torchvision.datasets import ImageFolder
 
     test_dir = "data/processed/test"
     if not os.path.isdir(test_dir):
-        raise FileNotFoundError(
-            f"Expected test set at {test_dir}/<class_name>/*.jpg"
-        )
+        raise FileNotFoundError(f"Expected test set at {test_dir}/<class_name>/*.jpg")
 
     transform = T.Compose(
         [
@@ -69,6 +64,7 @@ def get_test_loader(spec: OnnxInputSpec) -> DataLoader:
 
     ds = ImageFolder(test_dir, transform=transform)
     return DataLoader(ds, batch_size=32, shuffle=False, num_workers=2)
+
 
 def build_scenarios():
     def brightness(delta):
@@ -84,6 +80,7 @@ def build_scenarios():
     def noise(std):
         def _t(x):
             return torch.clamp(x + torch.randn_like(x) * std, 0, 1)
+
         return _t
 
     return [
@@ -110,11 +107,7 @@ def make_preprocess(scenario_fn, spec: OnnxInputSpec):
         x = torch.stack(xs)
 
         if spec.c == 1 and x.shape[1] == 3:
-            x = (
-                0.2989 * x[:, 0:1]
-                + 0.5870 * x[:, 1:2]
-                + 0.1140 * x[:, 2:3]
-            )
+            x = 0.2989 * x[:, 0:1] + 0.5870 * x[:, 1:2] + 0.1140 * x[:, 2:3]
         elif spec.c == 3 and x.shape[1] == 1:
             x = x.repeat(1, 3, 1, 1)
 
@@ -124,6 +117,7 @@ def make_preprocess(scenario_fn, spec: OnnxInputSpec):
         return x.float()
 
     return preprocess
+
 
 def load_model(onnx_path: str, spec: OnnxInputSpec) -> torch.nn.Module:
     import numpy as np
@@ -140,6 +134,7 @@ def load_model(onnx_path: str, spec: OnnxInputSpec) -> torch.nn.Module:
 
     return ONNXModel()
 
+
 def accuracy(logits, y):
     return (logits.argmax(1) == y).float().mean().item()
 
@@ -152,6 +147,7 @@ def evaluate(model, loader, preprocess):
         logits = model(x)
         accs.append(accuracy(logits, y))
     return sum(accs) / len(accs)
+
 
 def main():
     onnx_path = find_latest_onnx_model("models")

@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from http import HTTPStatus
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 import numpy as np
 import onnxruntime as ort
@@ -19,6 +19,7 @@ from PIL import Image, UnidentifiedImageError
 
 try:
     from google.cloud import storage
+
     GCS_AVAILABLE = True
 except ImportError:
     GCS_AVAILABLE = False
@@ -34,7 +35,7 @@ PREDICTION_LOG_PREFIX = os.getenv("PREDICTION_LOG_PREFIX", "prediction_logs")
 def normalize_imagenet(x: np.ndarray) -> np.ndarray:
     # x: float32, (C,H,W), in [0,1]
     mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)[:, None, None]
-    std  = np.array([0.229, 0.224, 0.225], dtype=np.float32)[:, None, None]
+    std = np.array([0.229, 0.224, 0.225], dtype=np.float32)[:, None, None]
     return (x - mean) / std
 
 
@@ -70,6 +71,7 @@ def pick_onnx(models_dir: Path) -> Path:
                 download_from_gcs(gcs_artifact, tar_path)
 
                 import tarfile
+
                 with tarfile.open(tar_path, "r:gz") as tar:
                     tar.extractall(temp_dir)
 
@@ -96,11 +98,12 @@ def pick_onnx(models_dir: Path) -> Path:
 
 def preprocess(pil_img: Image.Image) -> np.ndarray:
     img = pil_img.convert("RGB").resize(IMAGE_SIZE, Image.BILINEAR)
-    arr = np.asarray(img, dtype=np.float32) / 255.0          # (H,W,C) in [0,1]
-    x = np.transpose(arr, (2, 0, 1))                         # (C,H,W)
+    arr = np.asarray(img, dtype=np.float32) / 255.0  # (H,W,C) in [0,1]
+    x = np.transpose(arr, (2, 0, 1))  # (C,H,W)
     x = normalize_imagenet(x)
-    x = np.expand_dims(x, axis=0).astype(np.float32)         # (1,C,H,W)
+    x = np.expand_dims(x, axis=0).astype(np.float32)  # (1,C,H,W)
     return x
+
 
 def _to_gray(arr_hwc_01: np.ndarray) -> np.ndarray:
     # arr: (H,W,C) float32 in [0,1]
@@ -115,10 +118,7 @@ def _laplacian_var(gray_hw: np.ndarray) -> float:
     # pad edge
     gp = np.pad(g, ((1, 1), (1, 1)), mode="edge")
     center = gp[1:-1, 1:-1]
-    lap = (
-        gp[0:-2, 1:-1] + gp[2:, 1:-1] + gp[1:-1, 0:-2] + gp[1:-1, 2:]
-        - 4.0 * center
-    )
+    lap = gp[0:-2, 1:-1] + gp[2:, 1:-1] + gp[1:-1, 0:-2] + gp[1:-1, 2:] - 4.0 * center
     return float(np.var(lap))
 
 
@@ -136,7 +136,7 @@ def _edge_density(gray_hw: np.ndarray, thresh: float = 0.10) -> float:
 
 def extract_drift_features(pil_img: Image.Image) -> Dict[str, float]:
     img = pil_img.convert("RGB").resize(IMAGE_SIZE, Image.BILINEAR)
-    arr = (np.asarray(img, dtype=np.float32) / 255.0)  # (H,W,C) in [0,1]
+    arr = np.asarray(img, dtype=np.float32) / 255.0  # (H,W,C) in [0,1]
 
     brightness_mean = float(arr.mean())
     brightness_std = float(arr.std())
