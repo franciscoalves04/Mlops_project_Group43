@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import os
+import tempfile
 from contextlib import asynccontextmanager
 from http import HTTPStatus
 from pathlib import Path
@@ -11,6 +12,12 @@ import numpy as np
 import onnxruntime as ort
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from PIL import Image, UnidentifiedImageError
+
+try:
+    from google.cloud import storage
+    GCS_AVAILABLE = True
+except ImportError:
+    GCS_AVAILABLE = False
 
 
 CLASS_NAMES = ["cataract", "diabetic_retinopathy", "glaucoma", "normal"]
@@ -22,8 +29,54 @@ def normalize_imagenet(x: np.ndarray) -> np.ndarray:
     std  = np.array([0.229, 0.224, 0.225], dtype=np.float32)[:, None, None]
     return (x - mean) / std
 
+def download_from_gcs(gcs_uri: str, local_path: Path) -> None:
+    """Download a file from GCS."""
+    if not GCS_AVAILABLE:
+        raise ImportError("google-cloud-storage is required for GCS support")
+    
+    # Parse gs://bucket/path/to/file
+    parts = gcs_uri.replace("gs://", "").split("/", 1)
+    bucket_name = parts[0]
+    blob_path = parts[1] if len(parts) > 1 else ""
+    
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(blob_path)
+    
+    local_path.parent.mkdir(parents=True, exist_ok=True)
+    blob.download_to_filename(str(local_path))
+    print(f"Downloaded {gcs_uri} to {local_path}")
+
 def pick_onnx(models_dir: Path) -> Path:
-    # Prefer explicit env var if set
+    # Check for GCS artifact path first
+    gcs_artifact = os.getenv("GCS_MODEL_ARTIFACT")
+    if gcs_artifact:
+        print(f"Loading model from GCS artifact: {gcs_artifact}")
+        if GCS_AVAILABLE:
+            # Download from GCS
+            temp_dir = Path(tempfile.gettempdir()) / "model_artifact"
+            temp_dir.mkdir(exist_ok=True)
+            
+            # If it's a tar.gz, download and extract
+            if gcs_artifact.endswith(".tar.gz"):
+                tar_path = temp_dir / "model.tar.gz"
+                download_from_gcs(gcs_artifact, tar_path)
+                
+                import tarfile
+                with tarfile.open(tar_path, "r:gz") as tar:
+                    tar.extractall(temp_dir)
+                
+                # Find ONNX file in extracted directory
+                onnx_files = list(temp_dir.rglob("*.onnx"))
+                if onnx_files:
+                    return onnx_files[0]
+            else:
+                # Direct ONNX file
+                onnx_path = temp_dir / "model.onnx"
+                download_from_gcs(gcs_artifact, onnx_path)
+                return onnx_path
+    
+    # Prefer explicit env var if set (local path)
     explicit = os.getenv("ONNX_PATH")
     if explicit:
         p = Path(explicit)
@@ -31,6 +84,7 @@ def pick_onnx(models_dir: Path) -> Path:
             raise FileNotFoundError(f"ONNX_PATH set but not found: {p}")
         return p
 
+    # Fall back to local models directory
     candidates = sorted(models_dir.glob("*.onnx"), key=lambda p: p.stat().st_mtime, reverse=True)
     if not candidates:
         raise FileNotFoundError(f"No .onnx files found in {models_dir.resolve()}")
