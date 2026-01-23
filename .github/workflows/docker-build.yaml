@@ -69,9 +69,11 @@ jobs:
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - name: Set up Cloud SDK
+        if: ${{ github.event_name != 'pull_request' }}
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker
+        if: ${{ github.event_name != 'pull_request' }}
         run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
       - name: Set up Docker Buildx
