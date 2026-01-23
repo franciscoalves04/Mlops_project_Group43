@@ -170,8 +170,7 @@ will check the repositories and the code to verify your answers.
 
 --- We managed dependencies in our project using uv, a Python package and environment manager, together with the "pyproject.toml" specification. All project dependencies are declared in the "pyproject.toml" file, including core libraries such as PyTorch, PyTorch Lightning, FastAPI, Hydra, and Weights & Biases, as well as a separate development dependency group for testing, linting, documentation, and CI tools (e.g. pytest, ruff, coverage). 
 Exact versions of all dependencies, including transitive dependencies and platform-specific wheels, are locked in the uv.lock file. This lock file ensures full reproducibility across different machines. To get an exact copy of the development environment, a new team member would clone the repository, install uv, and run: "uv sync --dev --locked".
-This command recreates the environment using the exact versions specified in "uv.lock".
----
+This command recreates the environment using the exact versions specified in "uv.lock". ---
 
 ### Question 5
 
@@ -187,7 +186,7 @@ This command recreates the environment using the exact versions specified in "uv
 >
 > Answer:
 
---- question 5 fill here ---
+--- From the cookiecutter template we have filled out the dockerfiles, .github, src and tests folders. We have added a logs folder that contains training and evaluation logs for monitoring and debugging purposes. ---
 
 ### Question 6
 
@@ -238,12 +237,10 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- 
-We have a total code coverage of 73%. This coverage includes all core source files, such as the data loading pipeline, model definition, and API code.
+--- We have a total code coverage of 73%. This coverage includes all core source files, such as the data loading pipeline, model definition, and API code.
 While this is a reasonable coverage level, we are far from 100% coverage of our code, and even if we were, we should not trust it to be completely error-free.
 Code coverage only measures line execution, not correctness. A line can execute successfully without being logically correct. For example, a function might return an incorrect value but still execute without crashing, making it pass coverage metrics while failing logically. Additionally, there can be other issues such as integration between individual units and/or external dependencies that are not captured by unit tests alone.
-To improve code quality beyond coverage metrics, we employ additional measures: type checking with mypy, linting and formatting with ruff, code reviews via pull requests, and integration testing. These practices help catch issues that coverage alone cannot detect. Therefore, while our 73% coverage provides reasonable assurance, we recognize it as one component of a multi-layered approach to code quality, not as a guarantee of error-free code.
----
+To improve code quality beyond coverage metrics, we employ additional measures: type checking with mypy, linting and formatting with ruff, code reviews via pull requests, and integration testing. These practices help catch issues that coverage alone cannot detect. Therefore, while our 73% coverage provides reasonable assurance, we recognize it as one component of a multi-layered approach to code quality, not as a guarantee of error-free code. ---
 
 ### Question 9
 
@@ -599,5 +596,4 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 
 --- question 31 fill here
 *All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
-*Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report. Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal.
----
+*Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report. Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal. ---
