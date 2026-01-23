@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements_frontend.txt /app/requirements_frontend.txt
 RUN pip install --no-cache-dir -r /app/requirements_frontend.txt
 
-COPY src/eye_diseases_classification/frontend.py /app/frontend.py
+COPY src/eye_diseases_classification/api_frontend.py /app/frontend.py
 
 EXPOSE 8080
 
