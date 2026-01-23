@@ -6,7 +6,7 @@ import streamlit as st
 @st.cache_resource  
 def get_backend_url():
     """Get the URL of the backend service."""
-    return "https://eye-api-967791335191.europe-west1.run.app/"
+    return "https://eye-api-967791335191.europe-north1.run.app/"
 
 
 def classify_image(image, backend):
