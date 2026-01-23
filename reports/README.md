@@ -148,7 +148,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- We only used frameworks/packages covered in this course during the classes. ---
+We only used frameworks/packages covered in this course during the classes.
 
 ## Coding environment
 
@@ -168,9 +168,9 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- We managed dependencies in our project using uv, a Python package and environment manager, together with the "pyproject.toml" specification. All project dependencies are declared in the "pyproject.toml" file, including core libraries such as PyTorch, PyTorch Lightning, FastAPI, Hydra, and Weights & Biases, as well as a separate development dependency group for testing, linting, documentation, and CI tools (e.g. pytest, ruff, coverage). 
+We managed dependencies in our project using uv, a Python package and environment manager, together with the "pyproject.toml" specification. All project dependencies are declared in the "pyproject.toml" file, including core libraries such as PyTorch, PyTorch Lightning, FastAPI, Hydra, and Weights & Biases, as well as a separate development dependency group for testing, linting, documentation, and CI tools (e.g. pytest, ruff, coverage). 
 Exact versions of all dependencies, including transitive dependencies and platform-specific wheels, are locked in the uv.lock file. This lock file ensures full reproducibility across different machines. To get an exact copy of the development environment, a new team member would clone the repository, install uv, and run: "uv sync --dev --locked".
-This command recreates the environment using the exact versions specified in "uv.lock". ---
+This command recreates the environment using the exact versions specified in "uv.lock".
 
 ### Question 5
 
@@ -186,7 +186,7 @@ This command recreates the environment using the exact versions specified in "uv
 >
 > Answer:
 
---- From the cookiecutter template we have filled out the dockerfiles, .github, src and tests folders. We have added a logs folder that contains training and evaluation logs for monitoring and debugging purposes. ---
+From the cookiecutter template we have filled out the dockerfiles, .github, src and tests folders. We have added a logs folder that contains training and evaluation logs for monitoring and debugging purposes.
 
 ### Question 6
 
@@ -201,9 +201,9 @@ This command recreates the environment using the exact versions specified in "uv
 >
 > Answer:
 
---- We implemented several rules to ensure code quality and formatting throughout the project. For linting and formatting, we used Ruff, which is executed both locally and automatically in our GitHub Actions workflows. Ruff enforces consistent code style, checks for common Python errors, and ensures compliance with best practices such as PEP8. Formatting is also enforced using ruff format, guaranteeing a uniform codebase across contributors.
+We implemented several rules to ensure code quality and formatting throughout the project. For linting and formatting, we used Ruff, which is executed both locally and automatically in our GitHub Actions workflows. Ruff enforces consistent code style, checks for common Python errors, and ensures compliance with best practices such as PEP8. Formatting is also enforced using ruff format, guaranteeing a uniform codebase across contributors.
 We also included mypy in the CI pipeline, which is capable of checking type hints in Python.
-Additionally, we added meaningful inline comments in core modules to explain functionality. These practices improve readability, reduce bugs, and make collaboration easier in larger projects. ---
+Additionally, we added meaningful inline comments in core modules to explain functionality. These practices improve readability, reduce bugs, and make collaboration easier in larger projects.
 
 ## Version control
 
@@ -222,7 +222,7 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- In total, we have implemented 39 unit tests using pytest, which are executed automatically in our CI pipeline. These tests primarily cover the core functionality of our project, including dataset loading and preprocessing, image normalization and augmentation, model initialization, forward pass, training, validation, testing steps, and optimizer configuration. By verifying that inputs produce the expected outputs and that key logic behaves correctly, these tests help catch bugs early, ensure reproducibility, and maintain code reliability as the project grows. ---
+In total, we have implemented 39 unit tests using pytest, which are executed automatically in our CI pipeline. These tests primarily cover the core functionality of our project, including dataset loading and preprocessing, image normalization and augmentation, model initialization, forward pass, training, validation, testing steps, and optimizer configuration. By verifying that inputs produce the expected outputs and that key logic behaves correctly, these tests help catch bugs early, ensure reproducibility, and maintain code reliability as the project grows.
 
 ### Question 8
 
@@ -237,10 +237,10 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- We have a total code coverage of 73%. This coverage includes all core source files, such as the data loading pipeline, model definition, and API code.
+We have a total code coverage of 73%. This coverage includes all core source files, such as the data loading pipeline, model definition, and API code.
 While this is a reasonable coverage level, we are far from 100% coverage of our code, and even if we were, we should not trust it to be completely error-free.
 Code coverage only measures line execution, not correctness. A line can execute successfully without being logically correct. For example, a function might return an incorrect value but still execute without crashing, making it pass coverage metrics while failing logically. Additionally, there can be other issues such as integration between individual units and/or external dependencies that are not captured by unit tests alone.
-To improve code quality beyond coverage metrics, we employ additional measures: type checking with mypy, linting and formatting with ruff, code reviews via pull requests, and integration testing. These practices help catch issues that coverage alone cannot detect. Therefore, while our 73% coverage provides reasonable assurance, we recognize it as one component of a multi-layered approach to code quality, not as a guarantee of error-free code. ---
+To improve code quality beyond coverage metrics, we employ additional measures: type checking with mypy, linting and formatting with ruff, code reviews via pull requests, and integration testing. These practices help catch issues that coverage alone cannot detect. Therefore, while our 73% coverage provides reasonable assurance, we recognize it as one component of a multi-layered approach to code quality, not as a guarantee of error-free code.
 
 ### Question 9
 
@@ -255,7 +255,7 @@ To improve code quality beyond coverage metrics, we employ additional measures: 
 >
 > Answer:
 
---- Yes, our workflow included using both branches and pull requests (PRs) to manage version control effectively. Each team member worked on a separate branch, keeping the main branch stable and production-ready. Once a feature was complete, the developer created a PR to merge their branch into main, which was merged only after being reviewed and approved by another team member. This PR triggered automated CI workflows, including tests, linting, formatting checks, and type checking. Additionally, PRs enabled code reviews, allowing the team to provide feedback and catch potential issues before merging. Using branches and PRs improves collaboration, reduces conflicts, and maintains a clear history of changes, making it easier to track progress, revert changes if needed, and keep the project clean and maintainable. ---
+Yes, our workflow included using both branches and pull requests (PRs) to manage version control effectively. Each team member worked on a separate branch, keeping the main branch stable and production-ready. Once a feature was complete, the developer created a PR to merge their branch into main, which was merged only after being reviewed and approved by another team member. This PR triggered automated CI workflows, including tests, linting, formatting checks, and type checking. Additionally, PRs enabled code reviews, allowing the team to provide feedback and catch potential issues before merging. Using branches and PRs improves collaboration, reduces conflicts, and maintains a clear history of changes, making it easier to track progress, revert changes if needed, and keep the project clean and maintainable.
 
 ### Question 10
 
@@ -270,7 +270,7 @@ To improve code quality beyond coverage metrics, we employ additional measures: 
 >
 > Answer:
 
---- We ended up not using DVC in our project due to some technical issues during setup. Instead, we chose to upload our data directly to Google Cloud Platform (GCP) for storage and access. While this approach allowed us to share data among team members and integrate it with our training pipelines, it does not provide the full benefits of data versioning. ---
+We ended up not using DVC in our project due to some technical issues during setup. Instead, we chose to upload our data directly to Google Cloud Platform (GCP) for storage and access. While this approach allowed us to share data among team members and integrate it with our training pipelines, it does not provide the full benefits of data versioning.
 
 ### Question 11
 
@@ -287,12 +287,12 @@ To improve code quality beyond coverage metrics, we employ additional measures: 
 >
 > Answer:
 
---- We organized our continuous integration (CI) setup into multiple GitHub Actions workflows to ensure code quality, correctness, and reproducibility. First, we have a unit testing workflow (test.yaml) that installs project dependencies using uv and runs all tests with pytest and coverage. This workflow also performs static type checking with mypy and ensures code formatting and linting rules using ruff. Second, we maintain a linting and formatting workflow (linting.yaml) that verifies consistent code style and enforces project-specific rules for readability and maintainability.
+We organized our continuous integration (CI) setup into multiple GitHub Actions workflows to ensure code quality, correctness, and reproducibility. First, we have a unit testing workflow (test.yaml) that installs project dependencies using uv and runs all tests with pytest and coverage. This workflow also performs static type checking with mypy and ensures code formatting and linting rules using ruff. Second, we maintain a linting and formatting workflow (linting.yaml) that verifies consistent code style and enforces project-specific rules for readability and maintainability.
 
 Our CI workflows run on Ubuntu-based virtual environments and are configured to use Python 3.12. While we currently do not test multiple OSes or Python versions, the setup can be easily extended using GitHub Actions’ matrix feature to test across different configurations. We also leverage dependency caching where possible (e.g., pip caching) to speed up workflow execution and reduce redundant downloads.
 
 These workflows are triggered automatically on push or pull request events to the main or master branches, ensuring that every change is validated before being merged. This allows us to catch issues early, enforce consistent coding standards, and maintain a stable main branch. By integrating testing, linting, formatting and type checking into the CI pipeline, we reduce the likelihood of bugs, make code easier to maintain, and streamline collaboration among team members.
-An example of a triggered workflow can be seen here: https://github.com/franciscoalves04/Mlops_project_Group43/actions/runs/21177408657/job/60909944186 ---
+An example of a triggered workflow can be seen here: https://github.com/franciscoalves04/Mlops_project_Group43/actions/runs/21177408657/job/60909944186
 
 ## Running code and tracking experiments
 
@@ -632,5 +632,8 @@ For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationte
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- *All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
-*Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report. Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal. *Student s253414 contributed to: implementation of the data pipeline with preprocessing, the addition of the model and training procedure, the setup of logging, unit tests, code coverage calculation and the establishment of a basic CI workflow on GitHub Actions. ---
+*All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
+
+*Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report. Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal.
+
+*Student s253414 contributed to: implementation of the data pipeline with preprocessing, the addition of the model and training procedure, the setup of logging, unit tests, code coverage calculation and the establishment of a basic CI workflow on GitHub Actions.
