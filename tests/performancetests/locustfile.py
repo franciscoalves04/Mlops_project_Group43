@@ -1,4 +1,3 @@
-import random
 from pathlib import Path
 
 from locust import HttpUser, between, task
