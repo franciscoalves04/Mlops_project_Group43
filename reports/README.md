@@ -594,6 +594,5 @@ An example of a triggered workflow can be seen here: https://github.com/francisc
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here
-*All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
+--- *All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
 *Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report. Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal. ---
