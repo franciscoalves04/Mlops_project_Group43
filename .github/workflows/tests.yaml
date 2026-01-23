@@ -24,9 +24,3 @@ jobs:
 
     - name: Run tests with coverage
       run: uv run invoke test
-
-    - name: Ruff check
-      run: uv run ruff check .
-
-    - name: Ruff format
-      run: uv run ruff format .

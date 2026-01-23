@@ -1,4 +1,3 @@
-import os
 import pytest
 import torch
 from fastapi.testclient import TestClient
