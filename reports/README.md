@@ -52,54 +52,54 @@ will check the repositories and the code to verify your answers.
 
 ### Week 1
 
-* [ ] Create a git repository (M5)
-* [ ] Make sure that all team members have write access to the GitHub repository (M5)
-* [ ] Create a dedicated environment for you project to keep track of your packages (M2)
-* [ ] Create the initial file structure using cookiecutter with an appropriate template (M6)
-* [ ] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
-* [ ] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
-* [ ] Remember to either fill out the `requirements.txt`/`requirements_dev.txt` files or keeping your
+* [x] Create a git repository (M5)
+* [x] Make sure that all team members have write access to the GitHub repository (M5)
+* [x] Create a dedicated environment for you project to keep track of your packages (M2)
+* [x] Create the initial file structure using cookiecutter with an appropriate template (M6)
+* [x] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
+* [x] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
+* [x] Remember to either fill out the `requirements.txt`/`requirements_dev.txt` files or keeping your
     `pyproject.toml`/`uv.lock` up-to-date with whatever dependencies that you are using (M2+M6)
-* [ ] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
-* [ ] Do a bit of code typing and remember to document essential parts of your code (M7)
+* [x] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
+* [x] Do a bit of code typing and remember to document essential parts of your code (M7)
 * [ ] Setup version control for your data or part of your data (M8)
-* [ ] Add command line interfaces and project commands to your code where it makes sense (M9)
-* [ ] Construct one or multiple docker files for your code (M10)
-* [ ] Build the docker files locally and make sure they work as intended (M10)
-* [ ] Write one or multiple configurations files for your experiments (M11)
-* [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
-* [ ] Use profiling to optimize your code (M12)
-* [ ] Use logging to log important events in your code (M14)
-* [ ] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
-* [ ] Consider running a hyperparameter optimization sweep (M14)
-* [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
+* [x] Add command line interfaces and project commands to your code where it makes sense (M9)
+* [x] Construct one or multiple docker files for your code (M10)
+* [x] Build the docker files locally and make sure they work as intended (M10)
+* [x] Write one or multiple configurations files for your experiments (M11)
+* [x] Used Hydra to load the configurations and manage your hyperparameters (M11)
+* [x] Use profiling to optimize your code (M12)
+* [x] Use logging to log important events in your code (M14)
+* [x] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
+* [x] Consider running a hyperparameter optimization sweep (M14)
+* [x] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
 ### Week 2
 
-* [ ] Write unit tests related to the data part of your code (M16)
-* [ ] Write unit tests related to model construction and or model training (M16)
-* [ ] Calculate the code coverage (M16)
-* [ ] Get some continuous integration running on the GitHub repository (M17)
+* [x] Write unit tests related to the data part of your code (M16)
+* [x] Write unit tests related to model construction and or model training (M16)
+* [x] Calculate the code coverage (M16)
+* [x] Get some continuous integration running on the GitHub repository (M17)
 * [ ] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [ ] Add a linting step to your continuous integration (M17)
-* [ ] Add pre-commit hooks to your version control setup (M18)
+* [x] Add a linting step to your continuous integration (M17)
+* [x] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
-* [ ] Create a trigger workflow for automatically building your docker images (M21)
-* [ ] Get your model training in GCP using either the Engine or Vertex AI (M21)
-* [ ] Create a FastAPI application that can do inference using your model (M22)
-* [ ] Deploy your model in GCP using either Functions or Run as the backend (M23)
-* [ ] Write API tests for your application and setup continues integration for these (M24)
-* [ ] Load test your application (M24)
-* [ ] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
-* [ ] Create a frontend for your API (M26)
+* [x] Create a trigger workflow for automatically building your docker images (M21)
+* [x] Get your model training in GCP using either the Engine or Vertex AI (M21)
+* [x] Create a FastAPI application that can do inference using your model (M22)
+* [x] Deploy your model in GCP using either Functions or Run as the backend (M23)
+* [x] Write API tests for your application and setup continues integration for these (M24)
+* [x] Load test your application (M24)
+* [x] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
+* [x] Create a frontend for your API (M26)
 
 ### Week 3
 
-* [ ] Check how robust your model is towards data drifting (M27)
-* [ ] Setup collection of input-output data from your deployed application (M27)
-* [ ] Deploy to the cloud a drift detection API (M27)
+* [x] Check how robust your model is towards data drifting (M27)
+* [x] Setup collection of input-output data from your deployed application (M27)
+* [x] Deploy to the cloud a drift detection API (M27)
 * [ ] Instrument your API with a couple of system metrics (M28)
 * [ ] Setup cloud monitoring of your instrumented application (M28)
 * [ ] Create one or more alert systems in GCP to alert you if your app is not behaving correctly (M28)
@@ -113,8 +113,8 @@ will check the repositories and the code to verify your answers.
 * [ ] Publish the documentation to GitHub Pages (M32)
 * [ ] Revisit your initial project description. Did the project turn out as you wanted?
 * [ ] Create an architectural diagram over your MLOps pipeline
-* [ ] Make sure all group members have an understanding about all parts of the project
-* [ ] Uploaded all your code to GitHub
+* [x] Make sure all group members have an understanding about all parts of the project
+* [x] Uploaded all your code to GitHub
 
 ## Group information
 
@@ -134,7 +134,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- *s253414,  ---
+--- *s253414, s260263, ---
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -148,7 +148,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- We only used frameworks/packages covered in this course durring the classes. ---
+--- We only used frameworks/packages covered in this course during the classes. ---
 
 ## Coding environment
 
@@ -170,8 +170,7 @@ will check the repositories and the code to verify your answers.
 
 --- We managed dependencies in our project using uv, a Python package and environment manager, together with the "pyproject.toml" specification. All project dependencies are declared in the "pyproject.toml" file, including core libraries such as PyTorch, PyTorch Lightning, FastAPI, Hydra, and Weights & Biases, as well as a separate development dependency group for testing, linting, documentation, and CI tools (e.g. pytest, ruff, coverage). 
 Exact versions of all dependencies, including transitive dependencies and platform-specific wheels, are locked in the uv.lock file. This lock file ensures full reproducibility across different machines. To get an exact copy of the development environment, a new team member would clone the repository, install uv, and run: "uv sync --dev --locked".
-This command recreates the environment using the exact versions specified in "uv.lock".
----
+This command recreates the environment using the exact versions specified in "uv.lock". ---
 
 ### Question 5
 
@@ -187,7 +186,7 @@ This command recreates the environment using the exact versions specified in "uv
 >
 > Answer:
 
---- question 5 fill here ---
+--- From the cookiecutter template we have filled out the dockerfiles, .github, src and tests folders. We have added a logs folder that contains training and evaluation logs for monitoring and debugging purposes. ---
 
 ### Question 6
 
@@ -223,7 +222,7 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- In total, we have implemented a set of unit tests using pytest, which are executed in our CI pipeline. We are testing the core functionality of our modules to ensure that inputs produce the expected outputs and that key logic behaves correctly. ---
+--- In total, we have implemented 39 unit tests using pytest, which are executed automatically in our CI pipeline. These tests primarily cover the core functionality of our project, including dataset loading and preprocessing, image normalization and augmentation, model initialization, forward pass, training, validation, testing steps, and optimizer configuration. By verifying that inputs produce the expected outputs and that key logic behaves correctly, these tests help catch bugs early, ensure reproducibility, and maintain code reliability as the project grows. ---
 
 ### Question 8
 
@@ -238,7 +237,10 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- question 8 fill here ---
+--- We have a total code coverage of 73%. This coverage includes all core source files, such as the data loading pipeline, model definition, and API code.
+While this is a reasonable coverage level, we are far from 100% coverage of our code, and even if we were, we should not trust it to be completely error-free.
+Code coverage only measures line execution, not correctness. A line can execute successfully without being logically correct. For example, a function might return an incorrect value but still execute without crashing, making it pass coverage metrics while failing logically. Additionally, there can be other issues such as integration between individual units and/or external dependencies that are not captured by unit tests alone.
+To improve code quality beyond coverage metrics, we employ additional measures: type checking with mypy, linting and formatting with ruff, code reviews via pull requests, and integration testing. These practices help catch issues that coverage alone cannot detect. Therefore, while our 73% coverage provides reasonable assurance, we recognize it as one component of a multi-layered approach to code quality, not as a guarantee of error-free code. ---
 
 ### Question 9
 
@@ -268,7 +270,7 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- question 10 fill here ---
+--- We ended up not using DVC in our project due to some technical issues during setup. Instead, we chose to upload our data directly to Google Cloud Platform (GCP) for storage and access. While this approach allowed us to share data among team members and integrate it with our training pipelines, it does not provide the full benefits of data versioning. ---
 
 ### Question 11
 
@@ -630,4 +632,5 @@ For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationte
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+--- *All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
+*Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report. Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal. ---
