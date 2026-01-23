@@ -656,8 +656,9 @@ Finally, we initially attempted to use DVC (Data Version Control) to manage our 
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
-*All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
+--- *All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
 *Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report.
 *Student s214642 contributed to: All Google Cloud Platform infrastructure setup and management, including Vertex AI training job orchestration, GCS bucket configuration, Artifact Registry setup with model versioning by accuracy, and Workload Identity Federation authentication. Additionally, responsible for designing and implementing all GCP-dependent automated workflows (vertex-ai-training.yaml and deploy-api.yaml), WandB experiment tracking integration, model versioning strategy, and cloud-based deployment pipeline.
+*Student s253414 contributed to: implementation of the data pipeline with preprocessing, the addition of the model and training procedure, the setup of logging, unit tests, code coverage calculation and the establishment of a basic CI workflow on GitHub Actions.
 
 Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal. Gemini Pro was used for planning and file/folder structure.
