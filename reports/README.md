@@ -223,7 +223,7 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- In total, we have implemented a set of unit tests using pytest, which are executed in our CI pipeline. We are testing the core functionality of our modules to ensure that inputs produce the expected outputs and that key logic behaves correctly. ---
+--- In total, we have implemented 39 unit tests using pytest, which are executed automatically in our CI pipeline. These tests primarily cover the core functionality of our project, including dataset loading and preprocessing, image normalization and augmentation, model initialization, forward pass, training, validation, testing steps, and optimizer configuration. By verifying that inputs produce the expected outputs and that key logic behaves correctly, these tests help catch bugs early, ensure reproducibility, and maintain code reliability as the project grows. ---
 
 ### Question 8
 
@@ -239,7 +239,7 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 > Answer:
 
 --- 
-We have a total code coverage of 73%.
+We have a total code coverage of 73%. This coverage includes all core source files, such as the data loading pipeline, model definition, and API code.
 While this is a reasonable coverage level, we are far from 100% coverage of our code, and even if we were, we should not trust it to be completely error-free.
 Code coverage only measures line execution, not correctness. A line can execute successfully without being logically correct. For example, a function might return an incorrect value but still execute without crashing, making it pass coverage metrics while failing logically. Additionally, there can be other issues such as integration between individual units and/or external dependencies that are not captured by unit tests alone.
 To improve code quality beyond coverage metrics, we employ additional measures: type checking with mypy, linting and formatting with ruff, code reviews via pull requests, and integration testing. These practices help catch issues that coverage alone cannot detect. Therefore, while our 73% coverage provides reasonable assurance, we recognize it as one component of a multi-layered approach to code quality, not as a guarantee of error-free code.
