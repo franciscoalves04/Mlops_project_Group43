@@ -1,39 +1,9 @@
-name: Build and Push Docker Images
-
-on:
-  push:
-    branches:
-      - main
-      - Automation
-    paths:
-      - 'dockerfiles/**'
-      - 'src/**'
-      - 'pyproject.toml'
-      - 'uv.lock'
-      - '.github/workflows/docker-build.yaml'
-      - '.github/workflows/vertex-ai-training.yaml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'dockerfiles/**'
-      - 'src/**'
-      - 'pyproject.toml'
-      - 'uv.lock'
-  workflow_dispatch: # Allow manual trigger
-
-env:
-  REGISTRY: europe-west1-docker.pkg.dev
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REPOSITORY: mlops-images
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
-
 
     strategy:
       matrix:
@@ -43,17 +13,23 @@ jobs:
             context: .
 
     steps:
-      - name: Free Disk Space (Fast)
+      - name: Free Disk Space (Aggressive)
         run: |
           echo "Freeing space..."
-          sudo rm -rf /usr/local/lib/android  # deletes Android (saved ~9GB)
-          sudo rm -rf /usr/share/dotnet       # deletes .NET (saved ~4GB)
-          sudo rm -rf /opt/ghc                # deletes Haskell (saved ~3GB)
-          echo "Done! Space cleared."
+          # Delete huge pre-installed SDKs we don't need
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          
+          # Delete pre-installed cached Docker images (Saves ~3GB)
+          docker system prune -a -f
+          
+          echo "Disk space after cleanup:"
+          df -h
+
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Fixes the newline issue in the secret
       - name: Sanitize Project ID
         run: |
           echo "PROJECT_ID=$(echo "${{ secrets.GCP_PROJECT_ID }}" | tr -d '\n' | tr -d '\r')" >> $GITHUB_ENV
@@ -67,9 +43,8 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker ${{ env.REGISTRY }}
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -83,5 +58,6 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${{ github.ref_name }}
             ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ matrix.image.name }}:${{ github.ref_name }}-${{ hashFiles('**/pyproject.toml') }}
-          cache-from: type=gha
           provenance: false
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
