@@ -12,41 +12,44 @@ IMAGE_SIZE = (256, 256)
 MAX_IMAGES = 1000
 SPLIT_RATIOS = {"train": 0.7, "val": 0.15, "test": 0.15}
 
+
 def normalize_image(img: torch.Tensor) -> torch.Tensor:
     """ImageNet normalization."""
     mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
     std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
     return (img - mean) / std
 
+
 def augment_image(img: torch.Tensor) -> torch.Tensor:
     """Apply random augmentations to the image tensor (C, H, W) in range [0, 1]."""
     # Horizontal flip
     if torch.rand(1).item() > 0.5:
         img = torch.flip(img, dims=[2])
-    
+
     # Vertical flip
     if torch.rand(1).item() > 0.5:
         img = torch.flip(img, dims=[1])
-    
+
     # Random rotation (±15 degrees approximation via 90-degree rotations)
     if torch.rand(1).item() > 0.75:
         k = torch.randint(1, 4, (1,)).item()  # 1, 2, or 3 = 90, 180, 270 degrees
         img = torch.rot90(img, k, dims=[1, 2])
-    
+
     # Brightness adjustment
     if torch.rand(1).item() > 0.5:
         brightness_factor = 1.0 + (torch.rand(1).item() - 0.5) * 0.4  # ±20%
         img = img * brightness_factor
-    
+
     # Contrast adjustment
     if torch.rand(1).item() > 0.5:
         contrast_factor = 1.0 + (torch.rand(1).item() - 0.5) * 0.4  # ±20%
         mean = img.mean(dim=[1, 2], keepdim=True)
         img = (img - mean) * contrast_factor + mean
-    
+
     # Clamp to valid range
     img = torch.clamp(img, 0, 1)
     return img
+
 
 class MyDataset(Dataset):
     """Custom dataset for eye disease images."""
@@ -76,13 +79,13 @@ class MyDataset(Dataset):
         img = img.resize(IMAGE_SIZE, Image.BILINEAR)
 
         # PIL -> numpy -> torch tensor
-        img = np.array(img, dtype=np.float32) / 255.0   # (H, W, C)
-        img = torch.from_numpy(img).permute(2, 0, 1)    # (C, H, W)
+        img = np.array(img, dtype=np.float32) / 255.0  # (H, W, C)
+        img = torch.from_numpy(img).permute(2, 0, 1)  # (C, H, W)
 
         # Apply augmentation if training (before normalization)
         if self.augment:
             img = augment_image(img)
-        
+
         # Apply custom transform if provided
         if self.transform:
             img = self.transform(img)
@@ -91,7 +94,6 @@ class MyDataset(Dataset):
         img = normalize_image(img)
 
         return img, label
-
 
     def preprocess(self, output_folder: Path):
         """Preprocess raw data into train/val/test splits."""
@@ -113,8 +115,8 @@ class MyDataset(Dataset):
 
             splits = {
                 "train": images[:n_train],
-                "val": images[n_train:n_train + n_val],
-                "test": images[n_train + n_val:],
+                "val": images[n_train : n_train + n_val],
+                "test": images[n_train + n_val :],
             }
 
             for split, img_list in splits.items():
@@ -127,6 +129,10 @@ class MyDataset(Dataset):
             print(f"{class_dir.name}: {n_total} images processed")
 
 
+def preprocess(data_path: Path = typer.Argument(...), output_folder: Path = typer.Argument(...)):
+    """Preprocess raw data into train/val/test splits."""
+    dataset = MyDataset(data_path)
+    dataset.preprocess(output_folder)
 
 
 if __name__ == "__main__":
