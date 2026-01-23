@@ -73,8 +73,12 @@ cover/
 *.pot
 
 # Data
+data/*
+!data/.gitkeep
 data/processed/*
+!data/processed/.gitkeep
 data/raw/*
+!data/raw/.gitkeep
 
 download_temp/
 
