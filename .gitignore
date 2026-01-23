@@ -97,6 +97,10 @@ logs/
 lightning_logs/
 reports/*
 !reports/README.md
+!reports/figures/
+!reports/figures/*.png
+!reports/figures/*.jpg
+!reports/figures/*.jpeg
 
 # Hydra outputs
 outputs/
@@ -104,11 +108,6 @@ multirun/
 
 # WandB
 wandb/
-
-# Training artifacts
-reports/figures/*.png
-reports/figures/*.jpg
-reports/figures/*.pdf
 
 # Django stuff:
 *.log

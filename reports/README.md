@@ -84,7 +84,7 @@ will check the repositories and the code to verify your answers.
 * [x] Add a linting step to your continuous integration (M17)
 * [x] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
-* [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
+* [x] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
 * [x] Create a trigger workflow for automatically building your docker images (M21)
 * [x] Get your model training in GCP using either the Engine or Vertex AI (M21)
@@ -101,7 +101,7 @@ will check the repositories and the code to verify your answers.
 * [x] Setup collection of input-output data from your deployed application (M27)
 * [x] Deploy to the cloud a drift detection API (M27)
 * [ ] Instrument your API with a couple of system metrics (M28)
-* [ ] Setup cloud monitoring of your instrumented application (M28)
+* [x] Setup cloud monitoring of your instrumented application (M28)
 * [ ] Create one or more alert systems in GCP to alert you if your app is not behaving correctly (M28)
 * [ ] If applicable, optimize the performance of your data loading using distributed data loading (M29)
 * [ ] If applicable, optimize the performance of your training pipeline by using distributed training (M30)
@@ -123,7 +123,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- 43 ---
+43
 
 ### Question 2
 > **Enter the study number for each member in the group**
@@ -134,7 +134,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- *s253414, s260263, ---
+s253414, s260263, s214642
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -148,7 +148,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- We only used frameworks/packages covered in this course during the classes. ---
+We only used frameworks/packages covered in this course during the classes.
 
 ## Coding environment
 
@@ -168,9 +168,9 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- We managed dependencies in our project using uv, a Python package and environment manager, together with the "pyproject.toml" specification. All project dependencies are declared in the "pyproject.toml" file, including core libraries such as PyTorch, PyTorch Lightning, FastAPI, Hydra, and Weights & Biases, as well as a separate development dependency group for testing, linting, documentation, and CI tools (e.g. pytest, ruff, coverage). 
+We managed dependencies in our project using uv, a Python package and environment manager, together with the "pyproject.toml" specification. All project dependencies are declared in the "pyproject.toml" file, including core libraries such as PyTorch, PyTorch Lightning, FastAPI, Hydra, and Weights & Biases, as well as a separate development dependency group for testing, linting, documentation, and CI tools (e.g. pytest, ruff, coverage). 
 Exact versions of all dependencies, including transitive dependencies and platform-specific wheels, are locked in the uv.lock file. This lock file ensures full reproducibility across different machines. To get an exact copy of the development environment, a new team member would clone the repository, install uv, and run: "uv sync --dev --locked".
-This command recreates the environment using the exact versions specified in "uv.lock". ---
+This command recreates the environment using the exact versions specified in "uv.lock".
 
 ### Question 5
 
@@ -186,7 +186,7 @@ This command recreates the environment using the exact versions specified in "uv
 >
 > Answer:
 
---- From the cookiecutter template we have filled out the dockerfiles, .github, src and tests folders. We have added a logs folder that contains training and evaluation logs for monitoring and debugging purposes. ---
+From the cookiecutter template we have filled out the dockerfiles, .github, src and tests folders. We have added a logs folder that contains training and evaluation logs for monitoring and debugging purposes.
 
 ### Question 6
 
@@ -201,9 +201,9 @@ This command recreates the environment using the exact versions specified in "uv
 >
 > Answer:
 
---- We implemented several rules to ensure code quality and formatting throughout the project. For linting and formatting, we used Ruff, which is executed both locally and automatically in our GitHub Actions workflows. Ruff enforces consistent code style, checks for common Python errors, and ensures compliance with best practices such as PEP8. Formatting is also enforced using ruff format, guaranteeing a uniform codebase across contributors.
+We implemented several rules to ensure code quality and formatting throughout the project. For linting and formatting, we used Ruff, which is executed both locally and automatically in our GitHub Actions workflows. Ruff enforces consistent code style, checks for common Python errors, and ensures compliance with best practices such as PEP8. Formatting is also enforced using ruff format, guaranteeing a uniform codebase across contributors.
 We also included mypy in the CI pipeline, which is capable of checking type hints in Python.
-Additionally, we added meaningful inline comments in core modules to explain functionality. These practices improve readability, reduce bugs, and make collaboration easier in larger projects. ---
+Additionally, we added meaningful inline comments in core modules to explain functionality. These practices improve readability, reduce bugs, and make collaboration easier in larger projects.
 
 ## Version control
 
@@ -222,7 +222,7 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- In total, we have implemented 39 unit tests using pytest, which are executed automatically in our CI pipeline. These tests primarily cover the core functionality of our project, including dataset loading and preprocessing, image normalization and augmentation, model initialization, forward pass, training, validation, testing steps, and optimizer configuration. By verifying that inputs produce the expected outputs and that key logic behaves correctly, these tests help catch bugs early, ensure reproducibility, and maintain code reliability as the project grows. ---
+In total, we have implemented 39 unit tests using pytest, which are executed automatically in our CI pipeline. These tests primarily cover the core functionality of our project, including dataset loading and preprocessing, image normalization and augmentation, model initialization, forward pass, training, validation, testing steps, and optimizer configuration. By verifying that inputs produce the expected outputs and that key logic behaves correctly, these tests help catch bugs early, ensure reproducibility, and maintain code reliability as the project grows.
 
 ### Question 8
 
@@ -237,10 +237,10 @@ Additionally, we added meaningful inline comments in core modules to explain fun
 >
 > Answer:
 
---- We have a total code coverage of 73%. This coverage includes all core source files, such as the data loading pipeline, model definition, and API code.
+We have a total code coverage of 73%. This coverage includes all core source files, such as the data loading pipeline, model definition, and API code.
 While this is a reasonable coverage level, we are far from 100% coverage of our code, and even if we were, we should not trust it to be completely error-free.
 Code coverage only measures line execution, not correctness. A line can execute successfully without being logically correct. For example, a function might return an incorrect value but still execute without crashing, making it pass coverage metrics while failing logically. Additionally, there can be other issues such as integration between individual units and/or external dependencies that are not captured by unit tests alone.
-To improve code quality beyond coverage metrics, we employ additional measures: type checking with mypy, linting and formatting with ruff, code reviews via pull requests, and integration testing. These practices help catch issues that coverage alone cannot detect. Therefore, while our 73% coverage provides reasonable assurance, we recognize it as one component of a multi-layered approach to code quality, not as a guarantee of error-free code. ---
+To improve code quality beyond coverage metrics, we employ additional measures: type checking with mypy, linting and formatting with ruff, code reviews via pull requests, and integration testing. These practices help catch issues that coverage alone cannot detect. Therefore, while our 73% coverage provides reasonable assurance, we recognize it as one component of a multi-layered approach to code quality, not as a guarantee of error-free code.
 
 ### Question 9
 
@@ -255,7 +255,7 @@ To improve code quality beyond coverage metrics, we employ additional measures: 
 >
 > Answer:
 
---- Yes, our workflow included using both branches and pull requests (PRs) to manage version control effectively. Each team member worked on a separate branch, keeping the main branch stable and production-ready. Once a feature was complete, the developer created a PR to merge their branch into main, which was merged only after being reviewed and approved by another team member. This PR triggered automated CI workflows, including tests, linting, formatting checks, and type checking. Additionally, PRs enabled code reviews, allowing the team to provide feedback and catch potential issues before merging. Using branches and PRs improves collaboration, reduces conflicts, and maintains a clear history of changes, making it easier to track progress, revert changes if needed, and keep the project clean and maintainable. ---
+Yes, our workflow included using both branches and pull requests (PRs) to manage version control effectively. Each team member worked on a separate branch, keeping the main branch stable and production-ready. Once a feature was complete, the developer created a PR to merge their branch into main, which was merged only after being reviewed and approved by another team member. This PR triggered automated CI workflows, including tests, linting, formatting checks, and type checking. Additionally, PRs enabled code reviews, allowing the team to provide feedback and catch potential issues before merging. Using branches and PRs improves collaboration, reduces conflicts, and maintains a clear history of changes, making it easier to track progress, revert changes if needed, and keep the project clean and maintainable.
 
 ### Question 10
 
@@ -270,7 +270,7 @@ To improve code quality beyond coverage metrics, we employ additional measures: 
 >
 > Answer:
 
---- We ended up not using DVC in our project due to some technical issues during setup. Instead, we chose to upload our data directly to Google Cloud Platform (GCP) for storage and access. While this approach allowed us to share data among team members and integrate it with our training pipelines, it does not provide the full benefits of data versioning. ---
+We ended up not using DVC in our project due to some technical issues during setup. Instead, we chose to upload our data directly to Google Cloud Platform (GCP) for storage and access. While this approach allowed us to share data among team members and integrate it with our training pipelines, it does not provide the full benefits of data versioning.
 
 ### Question 11
 
@@ -287,12 +287,12 @@ To improve code quality beyond coverage metrics, we employ additional measures: 
 >
 > Answer:
 
---- We organized our continuous integration (CI) setup into multiple GitHub Actions workflows to ensure code quality, correctness, and reproducibility. First, we have a unit testing workflow (test.yaml) that installs project dependencies using uv and runs all tests with pytest and coverage. This workflow also performs static type checking with mypy and ensures code formatting and linting rules using ruff. Second, we maintain a linting and formatting workflow (linting.yaml) that verifies consistent code style and enforces project-specific rules for readability and maintainability.
+We organized our continuous integration (CI) setup into multiple GitHub Actions workflows to ensure code quality, correctness, and reproducibility. First, we have a unit testing workflow (test.yaml) that installs project dependencies using uv and runs all tests with pytest and coverage. This workflow also performs static type checking with mypy and ensures code formatting and linting rules using ruff. Second, we maintain a linting and formatting workflow (linting.yaml) that verifies consistent code style and enforces project-specific rules for readability and maintainability.
 
 Our CI workflows run on Ubuntu-based virtual environments and are configured to use Python 3.12. While we currently do not test multiple OSes or Python versions, the setup can be easily extended using GitHub Actions’ matrix feature to test across different configurations. We also leverage dependency caching where possible (e.g., pip caching) to speed up workflow execution and reduce redundant downloads.
 
 These workflows are triggered automatically on push or pull request events to the main or master branches, ensuring that every change is validated before being merged. This allows us to catch issues early, enforce consistent coding standards, and maintain a stable main branch. By integrating testing, linting, formatting and type checking into the CI pipeline, we reduce the likelihood of bugs, make code easier to maintain, and streamline collaboration among team members.
-An example of a triggered workflow can be seen here: https://github.com/franciscoalves04/Mlops_project_Group43/actions/runs/21177408657/job/60909944186 ---
+An example of a triggered workflow can be seen here: https://github.com/franciscoalves04/Mlops_project_Group43/actions/runs/21177408657/job/60909944186
 
 ## Running code and tracking experiments
 
@@ -567,7 +567,7 @@ For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationte
 >
 > Answer:
 
---- question 27 fill here ---
+Group member s214642 used 26.56 DKK in total, of those being 23.68 kr. for Vertex AI, 2.80 kr. for the Artifacts Registry, and only 0.09 kr. for the Cloud Storage. The Vertex AI costs the most as expected, as we are borrowing a GPU from Google and training for lengthy times. 
 
 ### Question 28
 
@@ -592,6 +592,9 @@ For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationte
 > **overall steps in figure.**
 >
 > Recommended answer length: 200-400 words
+
+[Diagram](figures/architecture_diagram.png)
+
 >
 > Example:
 >
@@ -600,7 +603,18 @@ For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationte
 >
 > Answer:
 
---- question 29 fill here ---
+![MLOps System Architecture](figures/architecture_diagram.png)
+
+The starting point of the architecture is our local development environment, where we integrated PyTorch Lightning models with Hydra configuration management, FastAPI API development, and Streamlit frontend UI. All code is version-controlled in GitHub and tested locally using docker-compose for orchestration.
+
+Whenever we commit and push code to the main GitHub branch, it automatically triggers our GitHub Actions CI/CD pipeline consisting of three sequential workflows. The first workflow (docker-build.yaml) builds Docker images for training and API services, performs linting and testing with Ruff and pytest, and pushes the built images to Google Artifact Registry. This workflow completes quickly and serves as a checkpoint for code quality.
+
+The second workflow (vertex-ai-training.yaml) is triggered after docker-build succeeds. It submits a custom training job to Google Vertex AI with machine type n1-standard-4 and one NVIDIA T4 GPU. The training container automatically mounts the preprocessed data from GCS, trains the model using our Hydra-managed configuration, and logs all metrics to Weights & Biases for experiment tracking. Upon completion, the trained model is uploaded to GCS with naming convention `*-acc0.XXX` (accuracy-based versioning) and also stored as an artifact in Artifact Registry.
+
+The third workflow (deploy-api.yaml) is triggered after training completes. It queries Artifact Registry for the model with the highest accuracy, downloads it, and converts it from PyTorch Lightning checkpoint (.ckpt) to ONNX format using our export script. The ONNX model is then included in the API Docker image. The final deployment step provisions two Cloud Run services: the FastAPI API service (1Gi memory) for inference with `/health` and `/classify` endpoints using ONNX runtime, and the Streamlit frontend service (512Mi memory) that connects to the API backend via environment variable configuration. This architecture enables fully automated training-to-deployment orchestration from a single code commit.
+
+![Data Flow Pipeline](figures/data_flow.png)
+
 
 ### Question 30
 
@@ -614,7 +628,17 @@ For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationte
 >
 > Answer:
 
---- question 30 fill here ---
+The biggest challenge in the project was setting up and debugging the complete cloud infrastructure from a WSL (Windows Subsystem for Linux) environment on a personal Google Cloud Platform account. This took the longest to debug and configure because of compatibility issues between the Windows-based WSL setup and GCP authentication, particularly with Workload Identity Federation. Additionally, local Docker builds using credentials from WSL behaved differently than expected in the CI/CD pipeline, requiring extensive troubleshooting of permission and authentication flows.
+
+A secondary challenge was building training Docker images in GitHub Actions without the workflow crashing due to running out of storage space. The multi-stage Docker build process, while optimized, still consumed significant disk space during intermediate layers. We resolved this by disabling Docker layer caching in the GitHub Actions workflow, accepting slower build times in exchange for reliable builds that didn't fail due to disk space exhaustion. This trade-off was necessary for pipeline stability.
+
+Debugging interdependent GitHub Actions workflows also posed significant challenges. Since our deployment pipeline consists of sequential workflows (docker-build → vertex-ai-training → deploy-api), debugging failures in downstream workflows required waiting up to an hour for all previous jobs to complete before seeing results. This made the debugging cycle extremely slow. We partially mitigated this by adding verbose logging and better error messages, and by running preliminary tests locally using `docker-compose` before pushing to GitHub.
+
+Finally, we initially attempted to use DVC (Data Version Control) to manage our dataset versioning, but encountered integration issues with GCP and WSL. Rather than spending additional time debugging DVC configuration, we made a pragmatic decision to directly upload our preprocessed data to a GCS bucket with manual versioning through folder naming. While this sacrifices some version control benefits, it provided a working solution that integrated cleanly with our training pipeline and Vertex AI jobs. This decision taught us the value of evaluating tool complexity against practical project needs—sometimes simpler solutions are better, even if they lack some theoretical advantages.
+
+
+
+
 
 ### Question 31
 
@@ -632,5 +656,8 @@ For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationte
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- *All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
-*Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report. Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal. ---
+*All members contributed by complying with good coding practices (pep8), code typing and commenting in the code.
+*Student s260263 contributed to: environment setup, CLI and project commands, configuration files, hyperparameter sweeping using Weights & Biases, unit tests related to model construction, training and evaluation, pre-commits, linting and github actions as well as answering this report.
+*Student s214642 contributed to: All Google Cloud Platform infrastructure setup and management, including Vertex AI training job orchestration, GCS bucket configuration, Artifact Registry setup with model versioning by accuracy, and Workload Identity Federation authentication. Additionally, responsible for designing and implementing all GCP-dependent automated workflows (vertex-ai-training.yaml and deploy-api.yaml), WandB experiment tracking integration, model versioning strategy, and cloud-based deployment pipeline.
+
+Copilot was used for sparring and debugging obscure errors, both via the Copilot chat, inline chat and directly from the terminal. Gemini Pro was used for planning and file/folder structure.
