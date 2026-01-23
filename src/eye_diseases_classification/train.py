@@ -169,7 +169,7 @@ def main(cfg: DictConfig) -> None:
     torch.manual_seed(cfg.experiment.seed)
 
     # Initialize model with config parameters
-    model = ResNet(num_classes=cfg.model.num_classes, lr=cfg.model.learning_rate)
+    model = ResNet(num_classes=cfg.model.num_classes, lr=cfg.training.learning_rate)
 
     # Load data
     train_dataset = MyDataset(cfg.paths.data_dir + "/train", augment=cfg.data.augmentation.train)
