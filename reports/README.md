@@ -134,7 +134,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
-s253414, s260263, s214642
+s253414, s260263, s214642, s253147
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -548,7 +548,7 @@ For unit testing, we used pytest with FastAPI's TestClient (`tests/integrationte
 >
 > Answer:
 
---- question 26 fill here ---
+Yes, we managed to implement monitoring for our deployed model. Our inference service logs each prediction request asynchronously to a Google Cloud Storage bucket, including timestamps, predicted classes, confidence scores, and a set of extracted image features (such as brightness, contrast, and sharpness) that summarize the model inputs. In addition, we deployed a separate monitoring service on Cloud Run that loads a reference dataset derived from the training data and compares it with the most recent logged predictions. Using the Evidently framework, this service evaluates data drift, data quality, and target drift by analyzing changes in feature distributions and predicted labels. The monitoring service exposes an HTML report that allows us to inspect these metrics over time and decide when model retraining or updates are required, thereby improving the long-term robustness and reliability of the application.
 
 ## Overall discussion of project
 
@@ -583,7 +583,7 @@ Group member s214642 used 26.56 DKK in total, of those being 23.68 kr. for Verte
 >
 > Answer:
 
---- question 28 fill here ---
+Yes, in addition to the core backend and monitoring components, we implemented a simple web-based frontend for our API. The frontend provides an intuitive interface where users can upload eye images and receive model predictions without interacting directly with the API endpoints. This improves usability and makes the system easier to demonstrate and test, especially for non-technical users. The frontend communicates with the deployed inference service and displays the predicted disease class and confidence scores in a clear way. Implementing this interface helped us validate the end-to-end workflow of the application and ensured that the deployed model could be accessed and used in a practical, user-friendly manner.
 
 ### Question 29
 
