@@ -36,7 +36,7 @@ jobs:
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Install uv & dependencies
         uses: astral-sh/setup-uv@v5
@@ -101,7 +101,7 @@ jobs:
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
       
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Configure Docker
         run: gcloud auth configure-docker ${{ env.REGISTRY }}
@@ -145,7 +145,7 @@ jobs:
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
       
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Configure Docker
         run: gcloud auth configure-docker ${{ env.REGISTRY }}
